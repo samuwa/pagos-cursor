@@ -4,11 +4,7 @@ import { motion } from 'framer-motion'
 import { 
   Save, 
   X, 
-  Upload, 
-  FileText, 
-  DollarSign,
-  User,
-  Calendar
+  DollarSign
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
@@ -51,7 +47,7 @@ const ExpenseForm: React.FC = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const { user } = useAuth()
-  const { isRequester, isApprover, isPayer, isAdmin } = useRole()
+  const { isRequester, isAdmin } = useRole()
   
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])

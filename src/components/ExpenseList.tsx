@@ -3,12 +3,10 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
   Search, 
-  Filter, 
   Plus, 
   Eye, 
   Edit, 
   CheckCircle, 
-  XCircle,
   DollarSign,
   FileText
 } from 'lucide-react'

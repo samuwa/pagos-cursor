@@ -32,8 +32,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Dashboard Component
 const Dashboard: React.FC = () => {
-  const { user } = useAuth()
-  const { isRequester, isApprover, isPayer, isViewer } = useRole()
+  const { isRequester } = useRole()
 
   return (
     <div className="min-h-screen bg-neutral-50">

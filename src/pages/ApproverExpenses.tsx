@@ -1,8 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle, Clock } from 'lucide-react'
 import ExpenseList from '../components/ExpenseList'
-import Card from '../components/ui/Card'
 
 const ApproverExpenses: React.FC = () => {
   return (

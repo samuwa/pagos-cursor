@@ -1,9 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Plus } from 'lucide-react'
 import ExpenseList from '../components/ExpenseList'
-import Card from '../components/ui/Card'
-import Button from '../components/ui/Button'
 
 const RequesterExpenses: React.FC = () => {
   return (
