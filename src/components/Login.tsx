@@ -1,10 +1,8 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Lock, CheckCircle, AlertCircle } from 'lucide-react'
+import { Mail, Lock, CheckCircle, AlertCircle, Shield } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import Input from './ui/Input'
-import Button from './ui/Button'
-import Card from './ui/Card'
+import { BootstrapInput as Input, BootstrapButton as Button, BootstrapCard as Card, BootstrapAlert as Alert } from './ui/BootstrapComponents'
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -59,39 +57,43 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen d-flex align-items-center justify-content-center bg-gradient-to-br from-neutral-50 to-neutral-100 py-8 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-md"
+        className="w-100"
+        style={{ maxWidth: '420px' }}
       >
-        <Card className="p-8 shadow-medium border-0">
-          <motion.div 
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mb-6 shadow-soft">
-              <Lock className="h-8 w-8 text-primary-600" />
-            </div>
-            <h2 className="text-3xl font-bold text-neutral-900 mb-3">
-              Welcome to Pagos
-            </h2>
-            <p className="text-neutral-600 text-base leading-relaxed">
-              Enter your email to receive a secure login link
-            </p>
-          </motion.div>
+        <Card className="border-0 shadow-lg" shadow="lg">
+          <div className="card-body p-5">
+            <motion.div 
+              className="text-center mb-5"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              <div className="mx-auto mb-4 d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
+                <div className="bg-gradient-to-br from-primary-100 to-primary-200 rounded-circle d-flex align-items-center justify-content-center shadow-soft" style={{ width: '100%', height: '100%' }}>
+                  <Shield className="text-primary-600" size={32} />
+                </div>
+              </div>
+              
+              <h2 className="h3 fw-bold text-neutral-900 mb-3">
+                Welcome to Pagos
+              </h2>
+              <p className="text-neutral-600 mb-0">
+                Enter your email to receive a secure login link
+              </p>
+            </motion.div>
 
-          <motion.form 
-            onSubmit={handleSubmit} 
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <div className="space-y-2">
+            <motion.form 
+              onSubmit={handleSubmit} 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
               <Input
                 label="Email Address"
                 type="email"
@@ -101,56 +103,54 @@ const Login: React.FC = () => {
                 required
                 error={error}
                 disabled={loading}
-                className="text-base"
+                size="lg"
+                className="mb-4"
               />
-            </div>
 
-            <Button
-              type="submit"
-              loading={loading}
-              disabled={loading || !email.trim()}
-              className="w-full h-12 text-base font-semibold"
-              size="large"
+              <Button
+                type="submit"
+                loading={loading}
+                disabled={loading || !email.trim()}
+                variant="primary"
+                size="lg"
+                block
+                className="mb-4"
+              >
+                <Mail className="me-2" size={20} />
+                Send Login Link
+              </Button>
+
+              {message && (
+                <Alert variant="success" className="mb-0">
+                  <div className="d-flex align-items-center">
+                    <CheckCircle className="me-2" size={18} />
+                    <span className="fw-medium">{message}</span>
+                  </div>
+                </Alert>
+              )}
+
+              {error && (
+                <Alert variant="danger" className="mb-0">
+                  <div className="d-flex align-items-center">
+                    <AlertCircle className="me-2" size={18} />
+                    <span className="fw-medium">{error}</span>
+                  </div>
+                </Alert>
+              )}
+            </motion.form>
+
+            <motion.div 
+              className="mt-5 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
             >
-              <Mail className="w-5 h-5 mr-2" />
-              Send Login Link
-            </Button>
-
-            {message && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="flex items-center justify-center p-4 rounded-lg bg-secondary-50 text-secondary-700 border border-secondary-200"
-              >
-                <CheckCircle className="w-5 h-5 mr-2 text-secondary-600" />
-                <span className="text-sm font-medium">{message}</span>
-              </motion.div>
-            )}
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="flex items-center justify-center p-4 rounded-lg bg-danger-50 text-danger-700 border border-danger-200"
-              >
-                <AlertCircle className="w-5 h-5 mr-2 text-danger-600" />
-                <span className="text-sm font-medium">{error}</span>
-              </motion.div>
-            )}
-          </motion.form>
-
-          <motion.div 
-            className="mt-8 text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-          >
-            <p className="text-xs text-neutral-500">
-              Secure email-based authentication powered by Supabase
-            </p>
-          </motion.div>
+              <div className="d-flex align-items-center justify-content-center text-neutral-500">
+                <Lock className="me-2" size={14} />
+                <small className="fw-medium">Secure email-based authentication powered by Supabase</small>
+              </div>
+            </motion.div>
+          </div>
         </Card>
       </motion.div>
     </div>
