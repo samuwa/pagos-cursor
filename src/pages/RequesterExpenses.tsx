@@ -1,0 +1,25 @@
+import React from 'react'
+import { motion } from 'framer-motion'
+import { FileText, Plus } from 'lucide-react'
+import ExpenseList from '../components/ExpenseList'
+import Card from '../components/ui/Card'
+import Button from '../components/ui/Button'
+
+const RequesterExpenses: React.FC = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-7xl mx-auto py-8 px-6"
+    >
+      <ExpenseList
+        title="Mis Solicitudes"
+        filterBy="my-requests"
+        showCreateButton={true}
+      />
+    </motion.div>
+  )
+}
+
+export default RequesterExpenses 
