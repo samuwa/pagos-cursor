@@ -151,12 +151,12 @@ export const BootstrapInput: React.FC<BootstrapInputProps> = ({
   size = 'md',
   floating = false,
 }) => {
-  const baseClasses = 'form-control border-0 rounded-pill transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2'
+  const baseClasses = 'form-control border-0 rounded-pill transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 w-100'
   
   const sizeClasses = {
     sm: 'form-control-sm px-3 py-1.5 text-sm',
-    md: 'px-4 py-2.5 text-base',
-    lg: 'form-control-lg px-5 py-3 text-lg',
+    md: 'px-3 py-2 text-base',
+    lg: 'form-control-lg px-4 py-3 text-lg',
   }
   
   const stateClasses = error 
@@ -174,7 +174,7 @@ export const BootstrapInput: React.FC<BootstrapInputProps> = ({
   ].filter(Boolean).join(' ')
   
   return (
-    <div className="form-group mb-3">
+    <div className="form-group mb-0 w-100">
       {label && !floating && (
         <motion.label 
           className="form-label fw-semibold text-neutral-700 mb-2 d-block"
@@ -187,7 +187,7 @@ export const BootstrapInput: React.FC<BootstrapInputProps> = ({
         </motion.label>
       )}
       
-      <div className="position-relative">
+      <div className="position-relative w-100">
         <motion.input
           type={type}
           value={value}
@@ -196,6 +196,7 @@ export const BootstrapInput: React.FC<BootstrapInputProps> = ({
           disabled={disabled}
           required={required}
           className={classes}
+          style={{ boxSizing: 'border-box' }}
           whileFocus={!disabled ? { scale: 1.01 } : {}}
           whileHover={!disabled ? { scale: 1.005 } : {}}
           initial={{ opacity: 0, y: 10 }}

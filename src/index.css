@@ -362,6 +362,7 @@ body {
     border: 1px solid #ced4da;
     border-radius: 0.375rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-sizing: border-box;
   }
   
   .form-control:focus {
@@ -402,6 +403,17 @@ body {
     margin-top: 0.25rem;
     font-size: 0.875rem;
     color: #dc3545;
+  }
+  
+  /* Responsive padding utilities */
+  .p-md-5 {
+    padding: 3rem !important;
+  }
+  
+  @media (max-width: 767.98px) {
+    .p-md-5 {
+      padding: 1.5rem !important;
+    }
   }
   
   /* Alert components */
