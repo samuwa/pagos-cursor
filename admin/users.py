@@ -97,31 +97,17 @@ with tab2:
                         "email": new_email
                     }
                     
-                    st.write(f"**Actualizando usuario:** {selected_user['name']}")
-                    st.write(f"**Roles actuales:** {current_roles}")
-                    st.write(f"**Nuevos roles:** {new_roles}")
-                    
                     if update_user(selected_user['id'], update_data):
-                        st.write("✅ Información del usuario actualizada")
-                        
                         # Update roles
                         # Remove roles not in new selection
                         for role in current_roles:
                             if role not in new_roles:
-                                st.write(f"Removiendo rol: {role}")
-                                if remove_role_from_user(selected_user['id'], role):
-                                    st.write(f"✅ Rol '{role}' removido")
-                                else:
-                                    st.write(f"❌ Error removiendo rol '{role}'")
+                                remove_role_from_user(selected_user['id'], role)
                         
                         # Add new roles
                         for role in new_roles:
                             if role not in current_roles:
-                                st.write(f"Agregando rol: {role}")
-                                if assign_role_to_user(selected_user['id'], role):
-                                    st.write(f"✅ Rol '{role}' asignado")
-                                else:
-                                    st.write(f"❌ Error asignando rol '{role}'")
+                                assign_role_to_user(selected_user['id'], role)
                         
                         st.success("Usuario actualizado exitosamente!")
                         st.rerun()
