@@ -1,0 +1,139 @@
+﻿1. streamlit no longer uses st.experimental_rerun, is just st.rerun
+2. st.fragment:
+Decorator to turn a function into a fragment which can rerun independently of the full app.
+When a user interacts with an input widget created inside a fragment, Streamlit only reruns the fragment instead of the full app. If run_every is set, Streamlit will also rerun the fragment at the specified interval while the session is active, even if the user is not interacting with your app.
+To trigger an app rerun from inside a fragment, call st.rerun() directly. To trigger a fragment rerun from within itself, call st.rerun(scope="fragment"). Any values from the fragment that need to be accessed from the wider app should generally be stored in Session State.
+When Streamlit element commands are called directly in a fragment, the elements are cleared and redrawn on each fragment rerun, just like all elements are redrawn on each app rerun. The rest of the app is persisted during a fragment rerun. When a fragment renders elements into externally created containers, the elements will not be cleared with each fragment rerun. Instead, elements will accumulate in those containers with each fragment rerun, until the next app rerun.
+Calling st.sidebar in a fragment is not supported. To write elements to the sidebar with a fragment, call your fragment function inside a with st.sidebar context manager.
+Fragment code can interact with Session State, imported modules, and other Streamlit elements created outside the fragment. Note that these interactions are additive across multiple fragment reruns. You are responsible for handling any side effects of that behavior.
+Warning
+* Fragments can only contain widgets in their main body. Fragments can't render widgets to externally created containers.
+Function signature
+[source]
+	st.fragment(func=None, *, run_every=None)
+	Parameters
+	func (callable)
+	The function to turn into a fragment.
+	run_every (int, float, timedelta, str, or None)
+	The time interval between automatic fragment reruns. This can be one of the following:
+* None (default).
+* An int or float specifying the interval in seconds.
+* A string specifying the time in a format supported by Pandas' Timedelta constructor, e.g. "1d", "1.5 days", or "1h23s".
+* A timedelta object from Python's built-in datetime library, e.g. timedelta(days=1).
+If run_every is None, the fragment will only rerun from user-triggered events.
+	Examples
+The following example demonstrates basic usage of @st.fragment. As an analogy, "inflating balloons" is a slow process that happens outside of the fragment. "Releasing balloons" is a quick process that happens inside of the fragment.
+   1. import streamlit as st
+   2. import time
+   3.    4. @st.fragment
+   5. def release_the_balloons():
+   6.     st.button("Release the balloons", help="Fragment rerun")
+   7.     st.balloons()
+   8.    9. with st.spinner("Inflating balloons..."):
+   10.     time.sleep(5)
+   11. release_the_balloons()
+st.button("Inflate more balloons", help="Full rerun")
+
+
+
+3. st.navigation
+   1. Call st.navigation in your entrypoint file to define the available pages for your app. st.navigation returns the current page, which can be executed using .run() method.
+   2. When using st.navigation, your entrypoint file (the file passed to streamlit run) acts like a router or frame of common elements around each of your pages. Streamlit executes the entrypoint file with every app rerun. To execute the current page, you must call the .run() method on the StreamlitPage object returned by st.navigation.
+   3. The set of available pages can be updated with each rerun for dynamic navigation. By default, st.navigation displays the available pages in the sidebar if there is more than one page. This behavior can be changed using the position keyword argument.
+   4. As soon as any session of your app executes the st.navigation command, your app will ignore the pages/ directory (across all sessions).
+Function signature
+[source]
+	st.navigation(pages, *, position="sidebar", expanded=False)
+	Parameters
+	pages (Sequence[page-like], Mapping[str, Sequence[page-like]])
+	The available pages for the app.
+To create a navigation menu with no sections or page groupings, pages must be a list of page-like objects. Page-like objects are anything that can be passed to st.Page or a StreamlitPage object returned by st.Page.
+To create labeled sections or page groupings within the navigation menu, pages must be a dictionary. Each key is the label of a section and each value is the list of page-like objects for that section. If you use position="top", each grouping will be a collapsible item in the navigation menu.
+When you use a string or path as a page-like object, they are internally passed to st.Page and converted to StreamlitPage objects. In this case, the page will have the default title, icon, and path inferred from its path or filename. To customize these attributes for your page, initialize your page with st.Page.
+	position ("sidebar", "top", or "hidden")
+	The position of the navigation menu. If this is "sidebar" (default), the navigation widget appears at the top of the sidebar. If this is "top", the navigation appears in the top header of the app. If this is "hidden", the navigation widget is not displayed.
+If there is only one page in pages, the navigation will be hidden for any value of position.
+	expanded (bool)
+	Whether the navigation menu should be expanded. If this is False (default), the navigation menu will be collapsed and will include a button to view more options when there are too many pages to display. If this is True, the navigation menu will always be expanded; no button to collapse the menu will be displayed.
+If st.navigation changes from expanded=True to expanded=False on a rerun, the menu will stay expanded and a collapse button will be displayed.
+The parameter is only used when position="sidebar".
+	Returns
+	(StreamlitPage)
+	The current page selected by the user. To run the page, you must use the .run() method on it.
+	   5. Examples
+   6. The following examples show different possible entrypoint files, each named streamlit_app.py. An entrypoint file is passed to streamlit run. It manages your app's navigation and serves as a router between pages.
+   7. Example 1: Use a callable or Python file as a page
+   8. You can declare pages from callables or file paths. If you pass callables or paths to st.navigation as a page-like objects, they are internally converted to StreamlitPage objects using st.Page. In this case, the page titles, icons, and paths are inferred from the file or callable names.
+   9. page_1.py (in the same directory as your entrypoint file):
+   10. import streamlit as st
+   11.    12. st.title("Page 1")
+
+   13. import streamlit as st
+   14.    15. def page_2():
+   16.     st.title("Page 2")
+   17.    18. pg = st.navigation(["page_1.py", page_2])
+   19. pg.run()
+
+import streamlit as st
+
+
+pages = {
+    "Your account": [
+        st.Page("create_account.py", title="Create your account"),
+        st.Page("manage_account.py", title="Manage your account"),
+    ],
+    "Resources": [
+        st.Page("learn.py", title="Learn about us"),
+        st.Page("trial.py", title="Try it out"),
+    ],
+}
+
+
+pg = st.navigation(pages)
+pg.run()
+
+
+
+4. st.Page
+                
+        Configure a page for st.navigation in a multipage app.
+Call st.Page to initialize a StreamlitPage object, and pass it to st.navigation to declare a page in your app.
+When a user navigates to a page, st.navigation returns the selected StreamlitPage object. Call .run() on the returned StreamlitPage object to execute the page. You can only run the page returned by st.navigation, and you can only run it once per app rerun.
+A page can be defined by a Python file or Callable.
+Function signature
+[source]
+	st.Page(page, *, title=None, icon=None, url_path=None, default=False)
+	Parameters
+	page (str, Path, or callable)
+	The page source as a Callable or path to a Python file. If the page source is defined by a Python file, the path can be a string or pathlib.Path object. Paths can be absolute or relative to the entrypoint file. If the page source is defined by a Callable, the Callable can't accept arguments.
+	title (str or None)
+	The title of the page. If this is None (default), the page title (in the browser tab) and label (in the navigation menu) will be inferred from the filename or callable name in page. For more information, see Overview of multipage apps.
+	icon (str or None)
+	An optional emoji or icon to display next to the page title and label. If icon is None (default), no icon is displayed next to the page label in the navigation menu, and a Streamlit icon is displayed next to the title (in the browser tab). If icon is a string, the following options are valid:
+* A single-character emoji. For example, you can set icon="🚨"
+or icon="🔥". Emoji short codes are not supported.
+* An icon from the Material Symbols library (rounded style) in the
+format ":material/icon_name:" where "icon_name" is the name of the icon in snake case.
+For example, icon=":material/thumb_up:" will display the Thumb Up icon. Find additional icons in the Material Symbols font library.
+	url_path (str or None)
+	The page's URL pathname, which is the path relative to the app's root URL. If this is None (default), the URL pathname will be inferred from the filename or callable name in page. For more information, see Overview of multipage apps.
+The default page will have a pathname of "", indicating the root URL of the app. If you set default=True, url_path is ignored. url_path can't include forward slashes; paths can't include subdirectories.
+	default (bool)
+	Whether this page is the default page to be shown when the app is loaded. If default is False (default), the page will have a nonempty URL pathname. However, if no default page is passed to st.navigation and this is the first page, this page will become the default page. If default is True, then the page will have an empty pathname and url_path will be ignored.
+	Returns
+	(StreamlitPage)
+	The page object associated to the given script.
+	Example
+import streamlit as st
+
+
+def page2():
+    st.title("Second page")
+
+
+pg = st.navigation([
+    st.Page("page1.py", title="First page", icon="🔥"),
+    st.Page(page2, title="Second page", icon=":material/favorite:"),
+])
+pg.run()
+

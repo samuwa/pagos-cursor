@@ -1,158 +1,203 @@
-# 🏦 Pagos - Expense Management System
+# 💰 Pagos - Sistema de Gestión de Gastos
 
-A modern expense management application built with React, TypeScript, and Supabase.
+Un sistema completo de gestión de gastos empresariales construido con **Streamlit** y **Supabase**.
 
-## 🚀 Features
+## 🚀 Características
 
-- **Email OTP Authentication** - Secure login without passwords
-- **Role-Based Access Control** - Admin, Requester, Approver, Payer, Viewer roles
-- **Expense Management** - Create, track, and approve expenses
-- **Real-time Updates** - Live notifications and status changes
-- **File Upload** - Attach quotes and receipts
-- **Responsive Design** - Works on desktop and mobile
+### 👥 Gestión de Roles
+- **Admin**: Control total del sistema, gestión de usuarios, reportes
+- **Solicitador**: Crear y gestionar solicitudes de gastos
+- **Aprobador**: Revisar y aprobar/rechazar gastos
+- **Pagador**: Marcar gastos como pagados
+- **Vista**: Consultar y visualizar gastos (solo lectura)
 
-## 🛠️ Tech Stack
+### 📋 Funcionalidades Principales
+- ✅ **Autenticación segura** con Supabase Auth
+- 📝 **Formularios inteligentes** para solicitudes de gastos
+- 🔄 **Flujo de trabajo** completo: Solicitud → Aprobación → Pago
+- 📊 **Dashboard y reportes** con gráficos interactivos
+- 🔍 **Filtros avanzados** y búsqueda
+- 📱 **Interfaz responsive** y moderna
+- 🎨 **Diseño intuitivo** con emojis y colores
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS + Headless UI
-- **Backend**: Supabase (Database + Auth + Storage)
-- **Deployment**: Heroku
-- **Version Control**: GitHub
+### 🛠️ Tecnologías
 
-## 📋 Prerequisites
+- **Frontend**: Streamlit (Python)
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Gráficos**: Plotly
+- **Base de datos**: PostgreSQL
+- **Autenticación**: Supabase Auth
 
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- Heroku account
+## 📦 Instalación
 
-## 🚀 Quick Start
-
-### 1. Clone the repository
+### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/samuwa/pagos-cursor.git
-cd pagos-cursor
+git clone <repository-url>
+cd Pagos
 ```
 
-### 2. Install dependencies
+### 2. Instalar dependencias
 ```bash
-npm install
+pip install -r requirements.txt
 ```
 
-### 3. Set up environment variables
-Create a `.env.local` file in the root directory:
+### 3. Configurar variables de entorno
+Crear un archivo `.env` en la raíz del proyecto:
 ```env
-VITE_SUPABASE_URL=https://xidfcnlzvcydevjtqfkz.supabase.co
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_URL=tu_url_de_supabase
+SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
 ```
 
-### 4. Start development server
+### 4. Ejecutar la aplicación
 ```bash
-npm run dev
+streamlit run app.py
 ```
 
-The app will be available at `http://localhost:5173`
-
-## 🗄️ Database Setup
-
-The database schema is located in `db_setup/`:
-
-- `database_schema.md` - Complete schema documentation
-- `database_schema.sql` - SQL to create all tables and relationships
-
-To set up the database:
-1. Go to your Supabase Dashboard
-2. Navigate to SQL Editor
-3. Copy and paste the contents of `database_schema.sql`
-4. Execute the SQL
-
-## 🔐 Authentication
-
-The app uses Supabase Auth with Email OTP:
-
-1. **Login Flow**: User enters email → Receives OTP → Enters code → Logged in
-2. **Protected Routes**: All dashboard pages require authentication
-3. **Role-Based Access**: Different features based on user roles
-
-## 📁 Project Structure
+## 🗂️ Estructura del Proyecto
 
 ```
-src/
-├── components/          # React components
-│   └── Login.tsx       # Authentication component
-├── contexts/           # React contexts
-│   └── AuthContext.tsx # Authentication state management
-├── lib/                # Utility libraries
-│   └── supabase.ts     # Supabase client configuration
-└── App.tsx            # Main application component
+Pagos/
+├── app.py                 # Aplicación principal
+├── requirements.txt       # Dependencias Python
+├── .env                  # Variables de entorno
+├── functions/            # Funciones de base de datos
+│   ├── f_cud.py         # Create, Update, Delete
+│   └── f_read.py        # Read operations
+├── admin/               # Páginas de administrador
+│   ├── dashboard.py     # Dashboard principal
+│   ├── users.py         # Gestión de usuarios
+│   ├── expenses.py      # Gestión de gastos
+│   └── reports.py       # Reportes y analytics
+├── solicitador/         # Páginas de solicitador
+│   ├── new_expense.py   # Nuevo gasto
+│   └── my_expenses.py   # Mis gastos
+├── aprovador/           # Páginas de aprobador
+│   ├── pending.py       # Gastos pendientes
+│   ├── approved.py      # Gastos aprobados
+│   └── rejected.py      # Gastos rechazados
+├── pagador/             # Páginas de pagador
+│   ├── to_pay.py        # Gastos por pagar
+│   └── paid.py          # Gastos pagados
+├── vista/               # Páginas de vista
+│   ├── overview.py      # Vista general
+│   └── expenses.py      # Vista de gastos
+└── db_setup/           # Configuración de base de datos
+    ├── database_schema.md
+    ├── database_schema.sql
+    └── streamlit_updates.txt
 ```
 
-## 🚀 Deployment
+## 🔧 Configuración de Base de Datos
 
-### Heroku Deployment
-The app is configured for Heroku deployment:
+### Tablas Principales
 
-1. **Environment Variables**: Already set in Heroku
-2. **Build Command**: `npm run build`
-3. **Start Command**: `npm start`
+1. **users**: Información de usuarios
+2. **user_roles**: Roles asignados a usuarios
+3. **expenses**: Gastos del sistema
+4. **expense_attachments**: Archivos adjuntos (futuro)
 
-### Manual Deployment
-```bash
-# Build the app
-npm run build
+### Scripts de Configuración
 
-# Deploy to Heroku
-git add .
-git commit -m "Deploy to Heroku"
-git push heroku main
-```
+Los scripts de configuración se encuentran en `db_setup/`:
+- `database_schema.sql`: Esquema completo de la base de datos
+- `database_schema.md`: Documentación del esquema
 
-## 🔧 Development
+## 🎯 Uso del Sistema
 
-### Available Scripts
+### 1. Login
+- Acceder con email y contraseña
+- El sistema detecta automáticamente los roles del usuario
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+### 2. Navegación
+- **Sidebar dinámico**: Se adapta según los roles del usuario
+- **Navegación fluida**: Entre páginas sin recargar
 
-### Adding New Features
+### 3. Roles y Permisos
 
-1. **Components**: Add to `src/components/`
-2. **Pages**: Add to `src/pages/` (create if needed)
-3. **Types**: Add to `src/lib/supabase.ts`
-4. **Contexts**: Add to `src/contexts/`
+#### 👑 Admin
+- Dashboard con métricas completas
+- Gestión de usuarios y roles
+- Reportes y analytics
+- Control total de gastos
 
-## 📊 Database Schema
+#### 📝 Solicitador
+- Crear nuevos gastos
+- Ver historial de solicitudes
+- Editar gastos pendientes
 
-The application uses the following main tables:
+#### ✅ Aprobador
+- Revisar gastos pendientes
+- Aprobar/rechazar con comentarios
+- Ver historial de decisiones
 
-- **users** - User accounts and profiles
-- **user_roles** - Role assignments
-- **expenses** - Expense records
-- **categories** - Expense categories
-- **accounts** - Financial accounts
-- **receivers** - Suppliers/vendors
-- **quotes** - Quote documents
-- **comments** - User comments
-- **logs** - System audit logs
+#### 💳 Pagador
+- Ver gastos aprobados por pagar
+- Marcar como pagados
+- Registrar detalles de pago
 
-## 🤝 Contributing
+#### 👁️ Vista
+- Consultar todos los gastos
+- Ver métricas generales
+- Sin permisos de edición
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+## 🚀 Características Avanzadas
 
-## 📄 License
+### 📊 Dashboard Interactivo
+- Métricas en tiempo real
+- Gráficos con Plotly
+- Filtros dinámicos
 
-This project is licensed under the MIT License.
+### 🔍 Búsqueda y Filtros
+- Búsqueda por texto
+- Filtros por estado, categoría, fecha
+- Rango de montos
 
-## 🆘 Support
+### 📈 Reportes
+- Exportación a Excel
+- Gráficos de tendencias
+- Análisis por período
 
-For support, please open an issue on GitHub or contact the development team.
+### 🎨 UI/UX Moderna
+- Emojis para mejor UX
+- Colores por estado
+- Diseño responsive
+- Navegación intuitiva
+
+## 🔒 Seguridad
+
+- **Autenticación**: Supabase Auth
+- **Autorización**: Roles basados en base de datos
+- **Validación**: Formularios con validación
+- **Auditoría**: Logs de todas las acciones
+
+## 🛠️ Desarrollo
+
+### Nuevas Funcionalidades
+1. Crear página en el directorio correspondiente
+2. Agregar función en `functions/` si es necesario
+3. Actualizar navegación en `app.py`
+
+### Estructura de Datos
+- Todas las funciones de DB están en `functions/`
+- Separación clara entre CUD y Read operations
+- Manejo de errores consistente
+
+## 📞 Soporte
+
+Para soporte técnico o preguntas:
+- Revisar la documentación en `db_setup/`
+- Consultar los comentarios en el código
+- Verificar la configuración de Supabase
+
+## 🎉 ¡Listo para Usar!
+
+El sistema está completamente funcional y listo para ser desplegado en producción. Solo necesitas:
+
+1. ✅ Configurar Supabase
+2. ✅ Ejecutar los scripts de base de datos
+3. ✅ Configurar las variables de entorno
+4. ✅ ¡Ejecutar `streamlit run app.py`!
 
 ---
 
-**Built with ❤️ using React, TypeScript, and Supabase**
+**Desarrollado con ❤️ usando Streamlit y Supabase**
