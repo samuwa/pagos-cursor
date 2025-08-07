@@ -30,22 +30,22 @@ if 'otp_sent_time' not in st.session_state:
 
 def login_page():
     """Login interface with email OTP"""
-    st.title("💰 Pagos - Sistema de Gastos")
+    st.title("Pagos - Sistema de Gastos")
     st.markdown("---")
     
     # Center the login form
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        st.markdown("### 🔐 Iniciar Sesión")
+        st.markdown("### Iniciar Sesión")
         st.markdown("Ingresa tu email para recibir un código de verificación")
         
         if not st.session_state.otp_sent:
             # Step 1: Email input
             with st.form("email_form"):
-                email = st.text_input("📧 Email", placeholder="tu@email.com")
+                email = st.text_input("Email", placeholder="tu@email.com")
                 
-                submitted = st.form_submit_button("📤 Enviar Código", use_container_width=True)
+                submitted = st.form_submit_button("Enviar Código", use_container_width=True)
                 
                 if submitted:
                     if email and "@" in email:
@@ -54,12 +54,12 @@ def login_page():
                             st.session_state.otp_sent = True
                             st.session_state.otp_email = email
                             st.session_state.otp_sent_time = time.time()
-                            st.success("✅ Código enviado a tu email. Revisa tu bandeja de entrada.")
+                            st.success("Código enviado a tu email. Revisa tu bandeja de entrada.")
                             st.rerun()
                         else:
-                            st.error("❌ Error al enviar el código. Verifica tu email.")
+                            st.error("Error al enviar el código. Verifica tu email.")
                     else:
-                        st.warning("⚠️ Por favor ingresa un email válido.")
+                        st.warning("Por favor ingresa un email válido.")
         
         else:
             # Step 2: OTP verification
@@ -67,25 +67,25 @@ def login_page():
             
             # Check if OTP has expired (5 minutes)
             if time.time() - st.session_state.otp_sent_time > 300:  # 5 minutes
-                st.warning("⚠️ El código ha expirado. Solicita uno nuevo.")
+                st.warning("El código ha expirado. Solicita uno nuevo.")
                 st.session_state.otp_sent = False
                 st.session_state.otp_email = ""
                 st.rerun()
             
             with st.form("otp_form"):
-                otp = st.text_input("🔢 Código de Verificación", placeholder="123456", max_chars=6)
+                otp = st.text_input("Código de Verificación", placeholder="123456", max_chars=6)
                 
                 col1, col2 = st.columns(2)
                 with col1:
-                    submitted = st.form_submit_button("✅ Verificar", use_container_width=True)
+                    submitted = st.form_submit_button("Verificar", use_container_width=True)
                 with col2:
-                    if st.form_submit_button("🔄 Nuevo Código", use_container_width=True):
+                    if st.form_submit_button("Nuevo Código", use_container_width=True):
                         if send_otp_email(st.session_state.otp_email):
                             st.session_state.otp_sent_time = time.time()
-                            st.success("✅ Nuevo código enviado.")
+                            st.success("Nuevo código enviado.")
                             st.rerun()
                         else:
-                            st.error("❌ Error al enviar nuevo código.")
+                            st.error("Error al enviar nuevo código.")
                 
                 if submitted:
                     if otp and len(otp) == 6:
@@ -96,19 +96,19 @@ def login_page():
                             st.session_state.user_roles = get_user_roles(user['id'])
                             st.session_state.otp_sent = False
                             st.session_state.otp_email = ""
-                            st.success("✅ ¡Inicio de sesión exitoso!")
+                            st.success("¡Inicio de sesión exitoso!")
                             st.rerun()
                         else:
-                            st.error("❌ Código inválido. Por favor intenta de nuevo.")
+                            st.error("Código inválido. Por favor intenta de nuevo.")
                     else:
-                        st.warning("⚠️ Por favor ingresa el código de 6 dígitos.")
+                        st.warning("Por favor ingresa el código de 6 dígitos.")
             
             # Show remaining time
             remaining_time = int(300 - (time.time() - st.session_state.otp_sent_time))
             if remaining_time > 0:
                 minutes = remaining_time // 60
                 seconds = remaining_time % 60
-                st.info(f"⏰ Tiempo restante: {minutes}:{seconds:02d}")
+                st.info(f"Tiempo restante: {minutes}:{seconds:02d}")
 
 def main_app():
     """Main application with role-based navigation"""
@@ -118,11 +118,11 @@ def main_app():
     # Header with user info
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        st.title("💰 Pagos - Sistema de Gastos")
+        st.title("Pagos - Sistema de Gastos")
     with col2:
         st.markdown(f"**Usuario:** {user['name']}")
     with col3:
-        if st.button("🚪 Cerrar Sesión"):
+        if st.button("Cerrar Sesión"):
             st.session_state.user = None
             st.session_state.user_roles = []
             st.session_state.otp_sent = False
@@ -138,39 +138,39 @@ def main_app():
     # Admin pages
     if 'admin' in user_roles:
         pages.extend([
-            st.Page("admin/dashboard.py", title="📊 Dashboard", icon=":material/dashboard:"),
-            st.Page("admin/users.py", title="👥 Usuarios", icon=":material/people:"),
-            st.Page("admin/expenses.py", title="📋 Todos los Gastos", icon=":material/receipt:"),
-            st.Page("admin/reports.py", title="📈 Reportes", icon=":material/analytics:"),
+            st.Page("admin/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
+            st.Page("admin/users.py", title="Usuarios", icon=":material/people:"),
+            st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:"),
+            st.Page("admin/reports.py", title="Reportes", icon=":material/analytics:"),
         ])
     
     # Requester pages
     if 'requester' in user_roles:
         pages.extend([
-            st.Page("solicitador/new_expense.py", title="➕ Nuevo Gasto", icon=":material/add:"),
-            st.Page("solicitador/my_expenses.py", title="📝 Mis Gastos", icon=":material/list:"),
+            st.Page("solicitador/new_expense.py", title="Nuevo Gasto", icon=":material/add:"),
+            st.Page("solicitador/my_expenses.py", title="Mis Gastos", icon=":material/list:"),
         ])
     
     # Approver pages
     if 'approver' in user_roles:
         pages.extend([
-            st.Page("aprovador/pending.py", title="⏳ Pendientes", icon=":material/pending:"),
-            st.Page("aprovador/approved.py", title="✅ Aprobados", icon=":material/check_circle:"),
-            st.Page("aprovador/rejected.py", title="❌ Rechazados", icon=":material/cancel:"),
+            st.Page("aprovador/pending.py", title="Pendientes", icon=":material/pending:"),
+            st.Page("aprovador/approved.py", title="Aprobados", icon=":material/check_circle:"),
+            st.Page("aprovador/rejected.py", title="Rechazados", icon=":material/cancel:"),
         ])
     
     # Payer pages
     if 'payer' in user_roles:
         pages.extend([
-            st.Page("pagador/to_pay.py", title="💳 Por Pagar", icon=":material/payment:"),
-            st.Page("pagador/paid.py", title="✅ Pagados", icon=":material/done:"),
+            st.Page("pagador/to_pay.py", title="Por Pagar", icon=":material/payment:"),
+            st.Page("pagador/paid.py", title="Pagados", icon=":material/done:"),
         ])
     
     # Viewer pages (if any user has viewer role)
     if 'viewer' in user_roles or not pages:  # Show viewer pages if no other roles
         pages.extend([
-            st.Page("vista/overview.py", title="👁️ Vista General", icon=":material/visibility:"),
-            st.Page("vista/expenses.py", title="📋 Gastos", icon=":material/receipt:"),
+            st.Page("vista/overview.py", title="Vista General", icon=":material/visibility:"),
+            st.Page("vista/expenses.py", title="Gastos", icon=":material/receipt:"),
         ])
     
     # Create navigation
@@ -178,7 +178,7 @@ def main_app():
         pg = st.navigation(pages, position="sidebar", expanded=True)
         pg.run()
     else:
-        st.warning("⚠️ No tienes permisos para acceder a ninguna página. Contacta al administrador.")
+        st.warning("No tienes permisos para acceder a ninguna página. Contacta al administrador.")
 
 # Main app logic
 if st.session_state.user is None:

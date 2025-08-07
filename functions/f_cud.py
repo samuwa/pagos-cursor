@@ -11,7 +11,7 @@ def get_supabase_client() -> Client:
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_ANON_KEY")
     if not url or not key:
-        st.error("❌ Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.")
+        st.error("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.")
         return None
     return create_client(url, key)
 
@@ -29,7 +29,7 @@ def send_otp_email(email: str) -> bool:
         
         return True
     except Exception as e:
-        st.error(f"❌ Error sending OTP: {str(e)}")
+        st.error(f"Error sending OTP: {str(e)}")
         return False
 
 def verify_otp(email: str, otp: str) -> Optional[Dict[str, Any]]:
@@ -58,7 +58,7 @@ def verify_otp(email: str, otp: str) -> Optional[Dict[str, Any]]:
                 }
         return None
     except Exception as e:
-        st.error(f"❌ Authentication error: {str(e)}")
+        st.error(f"Authentication error: {str(e)}")
         return None
 
 def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
@@ -75,7 +75,7 @@ def get_user_roles(user_id: str) -> List[str]:
         response = supabase.table('user_roles').select('role').eq('user_id', user_id).execute()
         return [role['role'] for role in response.data]
     except Exception as e:
-        st.error(f"❌ Error getting user roles: {str(e)}")
+        st.error(f"Error getting user roles: {str(e)}")
         return []
 
 def create_expense(expense_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -88,7 +88,7 @@ def create_expense(expense_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         response = supabase.table('expenses').insert(expense_data).execute()
         return response.data[0] if response.data else None
     except Exception as e:
-        st.error(f"❌ Error creating expense: {str(e)}")
+        st.error(f"Error creating expense: {str(e)}")
         return None
 
 def update_expense(expense_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -101,7 +101,7 @@ def update_expense(expense_id: str, update_data: Dict[str, Any]) -> Optional[Dic
         response = supabase.table('expenses').update(update_data).eq('id', expense_id).execute()
         return response.data[0] if response.data else None
     except Exception as e:
-        st.error(f"❌ Error updating expense: {str(e)}")
+        st.error(f"Error updating expense: {str(e)}")
         return None
 
 def delete_expense(expense_id: str) -> bool:
@@ -114,7 +114,7 @@ def delete_expense(expense_id: str) -> bool:
         response = supabase.table('expenses').update({'deleted_at': 'now()'}).eq('id', expense_id).execute()
         return len(response.data) > 0
     except Exception as e:
-        st.error(f"❌ Error deleting expense: {str(e)}")
+        st.error(f"Error deleting expense: {str(e)}")
         return False
 
 def approve_expense(expense_id: str, approver_id: str, comments: str = None) -> bool:
@@ -125,16 +125,18 @@ def approve_expense(expense_id: str, approver_id: str, comments: str = None) -> 
             return False
             
         update_data = {
-            'status': 'approved',
-            'approved_by': approver_id,
-            'approved_at': 'now()',
-            'approver_comments': comments
+            'phase': 'Aprobado',
+            'approver_id': approver_id,
+            'updated_at': 'now()'
         }
+        
+        if comments:
+            update_data['description'] = comments
         
         response = supabase.table('expenses').update(update_data).eq('id', expense_id).execute()
         return len(response.data) > 0
     except Exception as e:
-        st.error(f"❌ Error approving expense: {str(e)}")
+        st.error(f"Error approving expense: {str(e)}")
         return False
 
 def reject_expense(expense_id: str, approver_id: str, comments: str = None) -> bool:
@@ -145,16 +147,18 @@ def reject_expense(expense_id: str, approver_id: str, comments: str = None) -> b
             return False
             
         update_data = {
-            'status': 'rejected',
-            'approved_by': approver_id,
-            'approved_at': 'now()',
-            'approver_comments': comments
+            'phase': 'Rechazado',
+            'approver_id': approver_id,
+            'updated_at': 'now()'
         }
+        
+        if comments:
+            update_data['description'] = comments
         
         response = supabase.table('expenses').update(update_data).eq('id', expense_id).execute()
         return len(response.data) > 0
     except Exception as e:
-        st.error(f"❌ Error rejecting expense: {str(e)}")
+        st.error(f"Error rejecting expense: {str(e)}")
         return False
 
 def mark_expense_as_paid(expense_id: str, payer_id: str, payment_date: str = None) -> bool:
@@ -165,15 +169,15 @@ def mark_expense_as_paid(expense_id: str, payer_id: str, payment_date: str = Non
             return False
             
         update_data = {
-            'status': 'paid',
-            'paid_by': payer_id,
-            'paid_at': payment_date or 'now()'
+            'phase': 'Pagado',
+            'payer_id': payer_id,
+            'updated_at': 'now()'
         }
         
         response = supabase.table('expenses').update(update_data).eq('id', expense_id).execute()
         return len(response.data) > 0
     except Exception as e:
-        st.error(f"❌ Error marking expense as paid: {str(e)}")
+        st.error(f"Error marking expense as paid: {str(e)}")
         return False
 
 def create_user(user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -186,7 +190,7 @@ def create_user(user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         response = supabase.table('users').insert(user_data).execute()
         return response.data[0] if response.data else None
     except Exception as e:
-        st.error(f"❌ Error creating user: {str(e)}")
+        st.error(f"Error creating user: {str(e)}")
         return None
 
 def update_user(user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -199,7 +203,7 @@ def update_user(user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str,
         response = supabase.table('users').update(update_data).eq('id', user_id).execute()
         return response.data[0] if response.data else None
     except Exception as e:
-        st.error(f"❌ Error updating user: {str(e)}")
+        st.error(f"Error updating user: {str(e)}")
         return None
 
 def assign_role_to_user(user_id: str, role: str) -> bool:
@@ -217,7 +221,7 @@ def assign_role_to_user(user_id: str, role: str) -> bool:
         response = supabase.table('user_roles').insert(role_data).execute()
         return len(response.data) > 0
     except Exception as e:
-        st.error(f"❌ Error assigning role: {str(e)}")
+        st.error(f"Error assigning role: {str(e)}")
         return False
 
 def remove_role_from_user(user_id: str, role: str) -> bool:
@@ -230,5 +234,5 @@ def remove_role_from_user(user_id: str, role: str) -> bool:
         response = supabase.table('user_roles').delete().eq('user_id', user_id).eq('role', role).execute()
         return len(response.data) > 0
     except Exception as e:
-        st.error(f"❌ Error removing role: {str(e)}")
+        st.error(f"Error removing role: {str(e)}")
         return False 
