@@ -1,8 +1,9 @@
 import streamlit as st
 import os
 from dotenv import load_dotenv
-from functions.f_cud import authenticate_user, get_user_roles
+from functions.f_cud import send_otp_email, verify_otp, get_user_roles
 from functions.f_read import get_user_by_email
+import time
 
 # Load environment variables
 load_dotenv()
@@ -20,9 +21,15 @@ if 'user' not in st.session_state:
     st.session_state.user = None
 if 'user_roles' not in st.session_state:
     st.session_state.user_roles = []
+if 'otp_sent' not in st.session_state:
+    st.session_state.otp_sent = False
+if 'otp_email' not in st.session_state:
+    st.session_state.otp_email = ""
+if 'otp_sent_time' not in st.session_state:
+    st.session_state.otp_sent_time = 0
 
 def login_page():
-    """Login interface"""
+    """Login interface with email OTP"""
     st.title("💰 Pagos - Sistema de Gastos")
     st.markdown("---")
     
@@ -31,25 +38,77 @@ def login_page():
     
     with col2:
         st.markdown("### 🔐 Iniciar Sesión")
+        st.markdown("Ingresa tu email para recibir un código de verificación")
         
-        with st.form("login_form"):
-            email = st.text_input("📧 Email", placeholder="tu@email.com")
-            password = st.text_input("🔑 Contraseña", type="password", placeholder="Tu contraseña")
-            
-            submitted = st.form_submit_button("🚀 Iniciar Sesión", use_container_width=True)
-            
-            if submitted:
-                if email and password:
-                    # Authenticate user
-                    user = authenticate_user(email, password)
-                    if user:
-                        st.session_state.user = user
-                        st.session_state.user_roles = get_user_roles(user['id'])
-                        st.rerun()
+        if not st.session_state.otp_sent:
+            # Step 1: Email input
+            with st.form("email_form"):
+                email = st.text_input("📧 Email", placeholder="tu@email.com")
+                
+                submitted = st.form_submit_button("📤 Enviar Código", use_container_width=True)
+                
+                if submitted:
+                    if email and "@" in email:
+                        # Send OTP
+                        if send_otp_email(email):
+                            st.session_state.otp_sent = True
+                            st.session_state.otp_email = email
+                            st.session_state.otp_sent_time = time.time()
+                            st.success("✅ Código enviado a tu email. Revisa tu bandeja de entrada.")
+                            st.rerun()
+                        else:
+                            st.error("❌ Error al enviar el código. Verifica tu email.")
                     else:
-                        st.error("❌ Credenciales inválidas. Por favor intenta de nuevo.")
-                else:
-                    st.warning("⚠️ Por favor completa todos los campos.")
+                        st.warning("⚠️ Por favor ingresa un email válido.")
+        
+        else:
+            # Step 2: OTP verification
+            st.markdown(f"**Código enviado a:** {st.session_state.otp_email}")
+            
+            # Check if OTP has expired (5 minutes)
+            if time.time() - st.session_state.otp_sent_time > 300:  # 5 minutes
+                st.warning("⚠️ El código ha expirado. Solicita uno nuevo.")
+                st.session_state.otp_sent = False
+                st.session_state.otp_email = ""
+                st.rerun()
+            
+            with st.form("otp_form"):
+                otp = st.text_input("🔢 Código de Verificación", placeholder="123456", max_chars=6)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    submitted = st.form_submit_button("✅ Verificar", use_container_width=True)
+                with col2:
+                    if st.form_submit_button("🔄 Nuevo Código", use_container_width=True):
+                        if send_otp_email(st.session_state.otp_email):
+                            st.session_state.otp_sent_time = time.time()
+                            st.success("✅ Nuevo código enviado.")
+                            st.rerun()
+                        else:
+                            st.error("❌ Error al enviar nuevo código.")
+                
+                if submitted:
+                    if otp and len(otp) == 6:
+                        # Verify OTP
+                        user = verify_otp(st.session_state.otp_email, otp)
+                        if user:
+                            st.session_state.user = user
+                            st.session_state.user_roles = get_user_roles(user['id'])
+                            st.session_state.otp_sent = False
+                            st.session_state.otp_email = ""
+                            st.success("✅ ¡Inicio de sesión exitoso!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Código inválido. Por favor intenta de nuevo.")
+                    else:
+                        st.warning("⚠️ Por favor ingresa el código de 6 dígitos.")
+            
+            # Show remaining time
+            remaining_time = int(300 - (time.time() - st.session_state.otp_sent_time))
+            if remaining_time > 0:
+                minutes = remaining_time // 60
+                seconds = remaining_time % 60
+                st.info(f"⏰ Tiempo restante: {minutes}:{seconds:02d}")
 
 def main_app():
     """Main application with role-based navigation"""
@@ -66,6 +125,9 @@ def main_app():
         if st.button("🚪 Cerrar Sesión"):
             st.session_state.user = None
             st.session_state.user_roles = []
+            st.session_state.otp_sent = False
+            st.session_state.otp_email = ""
+            st.session_state.otp_sent_time = 0
             st.rerun()
     
     st.markdown("---")

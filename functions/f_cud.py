@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from supabase import create_client, Client
 from typing import Dict, List, Optional, Any
+import time
 
 # Initialize Supabase client
 @st.cache_resource
@@ -14,17 +15,35 @@ def get_supabase_client() -> Client:
         return None
     return create_client(url, key)
 
-def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
-    """Authenticate user with email and password"""
+def send_otp_email(email: str) -> bool:
+    """Send OTP email to user"""
+    try:
+        supabase = get_supabase_client()
+        if not supabase:
+            return False
+            
+        # Send OTP email using Supabase Auth
+        response = supabase.auth.sign_in_with_otp({
+            "email": email
+        })
+        
+        return True
+    except Exception as e:
+        st.error(f"❌ Error sending OTP: {str(e)}")
+        return False
+
+def verify_otp(email: str, otp: str) -> Optional[Dict[str, Any]]:
+    """Verify OTP and authenticate user"""
     try:
         supabase = get_supabase_client()
         if not supabase:
             return None
             
-        # Authenticate with Supabase Auth
-        response = supabase.auth.sign_in_with_password({
+        # Verify OTP
+        response = supabase.auth.verify_otp({
             "email": email,
-            "password": password
+            "token": otp,
+            "type": "email"
         })
         
         if response.user:
@@ -41,6 +60,10 @@ def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
     except Exception as e:
         st.error(f"❌ Authentication error: {str(e)}")
         return None
+
+def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
+    """Legacy function - kept for compatibility but not used"""
+    return None
 
 def get_user_roles(user_id: str) -> List[str]:
     """Get user roles from the user_roles table"""
