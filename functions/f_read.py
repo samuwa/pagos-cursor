@@ -190,12 +190,20 @@ def get_user_roles(user_id: str) -> List[str]:
         supabase = get_supabase_client()
         if not supabase:
             return []
-            
-        response = supabase.table('user_roles').select('role').eq('user_id', user_id).execute()
         
-        # Debug: Log the response
+        # Debug: Log the user ID format
         st.sidebar.write(f"**DEBUG get_user_roles:**")
         st.sidebar.write(f"**User ID:** {user_id}")
+        st.sidebar.write(f"**User ID length:** {len(user_id)}")
+        st.sidebar.write(f"**User ID type:** {type(user_id)}")
+        
+        # Try to query all user_roles to see what's in the database
+        all_roles_response = supabase.table('user_roles').select('*').execute()
+        st.sidebar.write(f"**All user_roles in DB:** {all_roles_response.data}")
+        
+        # Now query for specific user
+        response = supabase.table('user_roles').select('role').eq('user_id', user_id).execute()
+        
         st.sidebar.write(f"**Response data:** {response.data}")
         st.sidebar.write(f"**Response count:** {len(response.data) if response.data else 0}")
         
