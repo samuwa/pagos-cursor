@@ -31,6 +31,24 @@ def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
 def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
     """Get user by ID"""
     try:
+        # Use service role key to bypass RLS for admin queries
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot fetch user.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        response = supabase_admin.table('users').select('*').eq('id', user_id).single().execute()
+        return response.data if response.data else None
+    except Exception as e:
+        st.error(f"Error getting user: {str(e)}")
+        return None
+
+def get_current_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
+    """Get current user's own profile (uses anonymous key for user's own data)"""
+    try:
         supabase = get_supabase_client()
         if not supabase:
             return None
@@ -38,17 +56,22 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
         response = supabase.table('users').select('*').eq('id', user_id).single().execute()
         return response.data if response.data else None
     except Exception as e:
-        st.error(f"Error getting user: {str(e)}")
+        st.error(f"Error getting user profile: {str(e)}")
         return None
 
 def get_all_users() -> List[Dict[str, Any]]:
     """Get all users"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for admin queries
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot fetch users.")
             return []
             
-        response = supabase.table('users').select('*').is_('deleted_at', 'null').execute()
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        response = supabase_admin.table('users').select('*').is_('deleted_at', 'null').execute()
         return response.data
     except Exception as e:
         st.error(f"Error getting users: {str(e)}")
