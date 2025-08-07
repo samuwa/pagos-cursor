@@ -67,11 +67,16 @@ def authenticate_user(email: str, password: str) -> Optional[Dict[str, Any]]:
 def get_user_roles(user_id: str) -> List[str]:
     """Get user roles from the user_roles table"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for role queries
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot fetch user roles.")
             return []
             
-        response = supabase.table('user_roles').select('role').eq('user_id', user_id).execute()
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        response = supabase_admin.table('user_roles').select('role').eq('user_id', user_id).execute()
         return [role['role'] for role in response.data]
     except Exception as e:
         st.error(f"Error getting user roles: {str(e)}")

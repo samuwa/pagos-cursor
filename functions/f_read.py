@@ -187,11 +187,16 @@ def get_expenses_by_amount_range(min_amount: float, max_amount: float) -> List[D
 def get_user_roles(user_id: str) -> List[str]:
     """Get roles for a specific user"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for role queries
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot fetch user roles.")
             return []
             
-        response = supabase.table('user_roles').select('role').eq('user_id', user_id).execute()
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        response = supabase_admin.table('user_roles').select('role').eq('user_id', user_id).execute()
         return [role['role'] for role in response.data]
     except Exception as e:
         st.error(f"Error getting user roles: {str(e)}")
