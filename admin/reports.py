@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import pandas as pd
 
-st.title("📈 Reportes y Analytics")
+st.subheader("Reportes y Analytics")
 
 # Get statistics
 stats = get_expense_statistics()
@@ -15,14 +15,14 @@ stats = get_expense_statistics()
 col1, col2 = st.columns(2)
 with col1:
     report_period = st.selectbox(
-        "📅 Período del reporte",
+        "Período del reporte",
         ["Últimos 7 días", "Últimos 30 días", "Últimos 90 días", "Este año", "Personalizado"]
     )
 
 with col2:
     if report_period == "Personalizado":
         custom_dates = st.date_input(
-            "📅 Seleccionar fechas",
+            "Seleccionar fechas",
             value=(datetime.now() - timedelta(days=30), datetime.now())
         )
 
@@ -54,14 +54,14 @@ period_expenses = get_expenses_by_date_range(
 )
 
 # Summary metrics
-st.subheader("📊 Métricas Principales")
+st.subheader("Métricas Principales")
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     total_amount = sum(e['amount'] for e in period_expenses)
     st.metric(
-        label="💰 Total Gastos",
+        label="Total Gastos",
         value=f"${total_amount:,.2f}",
         delta=None
     )
@@ -69,35 +69,35 @@ with col1:
 with col2:
     avg_amount = total_amount / len(period_expenses) if period_expenses else 0
     st.metric(
-        label="📊 Promedio",
+        label="Promedio",
         value=f"${avg_amount:,.2f}",
         delta=None
     )
 
 with col3:
     st.metric(
-        label="📋 Cantidad",
+        label="Cantidad",
         value=len(period_expenses),
         delta=None
     )
 
 with col4:
-    pending_count = len([e for e in period_expenses if e['status'] == 'pending'])
+    pending_count = len([e for e in period_expenses if e['phase'] == 'Creado'])
     st.metric(
-        label="⏳ Pendientes",
+        label="Pendientes",
         value=pending_count,
         delta=None
     )
 
 # Charts
 st.markdown("---")
-st.subheader("📈 Gráficos")
+st.subheader("Gráficos")
 
 # Status distribution
 if period_expenses:
     status_counts = {}
     for expense in period_expenses:
-        status = expense['status']
+        status = expense['phase']
         status_counts[status] = status_counts.get(status, 0) + 1
     
     if status_counts:

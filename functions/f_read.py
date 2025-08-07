@@ -184,6 +184,22 @@ def get_expenses_by_amount_range(min_amount: float, max_amount: float) -> List[D
         st.error(f"Error getting expenses by amount range: {str(e)}")
         return []
 
+def get_expenses_by_status(status: str) -> List[Dict[str, Any]]:
+    """Get expenses by status (maps to phase field)"""
+    # Map status to phase values
+    status_to_phase = {
+        'pending': 'Creado',
+        'approved': 'Aprobado', 
+        'paid': 'Pagado',
+        'rejected': 'Rechazado'
+    }
+    
+    phase = status_to_phase.get(status)
+    if phase:
+        return get_expenses_by_phase(phase)
+    else:
+        return get_all_expenses()
+
 def get_user_roles(user_id: str) -> List[str]:
     """Get roles for a specific user"""
     try:

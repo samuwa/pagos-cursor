@@ -5,7 +5,7 @@ from functions.f_cud import update_expense, delete_expense
 from functions.f_read import get_user_by_id
 from datetime import datetime, timedelta
 
-st.title("📋 Gestión de Gastos")
+st.subheader("Gestión de Gastos")
 
 # Filters
 st.subheader("🔍 Filtros")
@@ -14,20 +14,20 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     status_filter = st.selectbox(
-        "📊 Estado",
+        "Estado",
         ["Todos", "pending", "approved", "rejected", "paid"]
     )
 
 with col2:
     date_range = st.date_input(
-        "📅 Rango de fechas",
+        "Rango de fechas",
         value=(datetime.now() - timedelta(days=30), datetime.now()),
         max_value=datetime.now()
     )
 
 with col3:
     amount_range = st.slider(
-        "💰 Rango de monto",
+        "Rango de monto",
         min_value=0.0,
         max_value=10000.0,
         value=(0.0, 10000.0),
@@ -35,7 +35,7 @@ with col3:
     )
 
 # Search
-search_query = st.text_input("🔍 Buscar gastos", placeholder="Descripción o categoría...")
+search_query = st.text_input("Buscar gastos", placeholder="Descripción o categoría...")
 
 # Get expenses based on filters
 if status_filter == "Todos":
@@ -57,7 +57,7 @@ if search_query:
     expenses = [e for e in expenses if search_query.lower() in e['description'].lower() or search_query.lower() in e.get('category', '').lower()]
 
 # Display expenses
-st.subheader(f"📋 Gastos ({len(expenses)})")
+st.subheader(f"Gastos ({len(expenses)})")
 
 if expenses:
     # Summary metrics
@@ -66,17 +66,17 @@ if expenses:
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("💰 Total", f"${total_amount:,.2f}")
+        st.metric("Total", f"${total_amount:,.2f}")
     with col2:
-        st.metric("📊 Promedio", f"${avg_amount:,.2f}")
+        st.metric("Promedio", f"${avg_amount:,.2f}")
     with col3:
-        st.metric("📋 Cantidad", len(expenses))
+        st.metric("Cantidad", len(expenses))
     
     st.markdown("---")
     
     # Display each expense
     for expense in expenses:
-        with st.expander(f"${expense['amount']:.2f} - {expense['description']} ({expense['status']})"):
+        with st.expander(f"${expense['amount']:.2f} - {expense['description']} ({expense['phase']})"):
             col1, col2, col3 = st.columns([2, 2, 1])
             
             with col1:
@@ -89,7 +89,7 @@ if expenses:
                 # Get user info
                 user = get_user_by_id(expense['user_id'])
                 st.write(f"**Usuario:** {user['name'] if user else 'N/A'}")
-                st.write(f"**Estado:** {expense['status']}")
+                st.write(f"**Estado:** {expense['phase']}")
                 st.write(f"**Monto:** ${expense['amount']:.2f}")
                 
                 if expense.get('approved_by'):
@@ -102,22 +102,22 @@ if expenses:
             
             with col3:
                 # Action buttons
-                if expense['status'] == 'pending':
+                if expense['phase'] == 'Creado':
                     col_a, col_b = st.columns(2)
                     with col_a:
                         if st.button("✅ Aprobar", key=f"approve_{expense['id']}"):
-                            if update_expense(expense['id'], {'status': 'approved'}):
+                            if update_expense(expense['id'], {'phase': 'Aprobado'}):
                                 st.success("✅ Gasto aprobado!")
                                 st.rerun()
                     with col_b:
                         if st.button("❌ Rechazar", key=f"reject_{expense['id']}"):
-                            if update_expense(expense['id'], {'status': 'rejected'}):
+                            if update_expense(expense['id'], {'phase': 'Rechazado'}):
                                 st.success("❌ Gasto rechazado!")
                                 st.rerun()
                 
-                elif expense['status'] == 'approved':
+                elif expense['phase'] == 'Aprobado':
                     if st.button("💳 Marcar como Pagado", key=f"pay_{expense['id']}"):
-                        if update_expense(expense['id'], {'status': 'paid'}):
+                        if update_expense(expense['id'], {'phase': 'Pagado'}):
                             st.success("💳 Gasto marcado como pagado!")
                             st.rerun()
                 
@@ -147,7 +147,7 @@ if 'edit_expense' in st.session_state:
         description = st.text_input("📝 Descripción", value=expense['description'])
         amount = st.number_input("💰 Monto", value=float(expense['amount']), min_value=0.0, step=0.01)
         category = st.text_input("📂 Categoría", value=expense.get('category', ''))
-        status = st.selectbox("📊 Estado", ["pending", "approved", "rejected", "paid"], index=["pending", "approved", "rejected", "paid"].index(expense['status']))
+        status = st.selectbox("Estado", ["Creado", "Aprobado", "Rechazado", "Pagado"], index=["Creado", "Aprobado", "Rechazado", "Pagado"].index(expense['phase']))
         
         col1, col2 = st.columns(2)
         with col1:
@@ -162,7 +162,7 @@ if 'edit_expense' in st.session_state:
                 "description": description,
                 "amount": amount,
                 "category": category,
-                "status": status
+                "phase": status
             }
             
             if update_expense(expense['id'], update_data):
