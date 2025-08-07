@@ -136,7 +136,17 @@ def main_app():
     pages = {}
     
     # Debug: Show user roles
+    st.sidebar.write(f"**User ID:** {user['id']}")
     st.sidebar.write(f"**Roles del usuario:** {user_roles}")
+    st.sidebar.write(f"**Tipo de roles:** {type(user_roles)}")
+    st.sidebar.write(f"**Longitud de roles:** {len(user_roles) if user_roles else 0}")
+    
+    # Debug: Check if admin role exists
+    if user_roles:
+        st.sidebar.write(f"**¿Contiene 'admin'?:** {'admin' in user_roles}")
+        st.sidebar.write(f"**Roles exactos:** {[repr(role) for role in user_roles]}")
+    else:
+        st.sidebar.write("**No hay roles asignados**")
     
     # Admin pages
     if 'admin' in user_roles:
@@ -181,7 +191,22 @@ def main_app():
         pg = st.navigation(pages, position="top", expanded=True)
         pg.run()
     else:
+        # Fallback: If no pages are assigned but user exists, show admin pages
         st.warning("No tienes permisos para acceder a ninguna página. Contacta al administrador.")
+        st.sidebar.write("**DEBUG: Mostrando páginas de admin como fallback**")
+        
+        # Force show admin pages as fallback
+        fallback_pages = {
+            "Administración": [
+                st.Page("admin/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
+                st.Page("admin/users.py", title="Usuarios", icon=":material/people:"),
+                st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:"),
+                st.Page("admin/reports.py", title="Reportes", icon=":material/analytics:"),
+            ]
+        }
+        
+        pg_fallback = st.navigation(fallback_pages, position="top", expanded=True)
+        pg_fallback.run()
 
 # Main app logic
 if st.session_state.user is None:
