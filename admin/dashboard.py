@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-st.title("Dashboard Administrativo")
+st.subheader("Dashboard Administrativo")
 
 # Get statistics
 stats = get_expense_statistics()
@@ -79,20 +79,4 @@ if recent_expenses:
 else:
     st.info("No hay gastos recientes para mostrar.")
 
-# Quick actions
-st.markdown("---")
-st.subheader("Acciones Rápidas")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    if st.button("Ver Usuarios", use_container_width=True):
-        st.switch_page("admin/users.py")
-
-with col2:
-    if st.button("Ver Todos los Gastos", use_container_width=True):
-        st.switch_page("admin/expenses.py")
-
-with col3:
-    if st.button("Ver Reportes", use_container_width=True):
-        st.switch_page("admin/reports.py") 
+ 
