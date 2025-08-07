@@ -110,20 +110,18 @@ def main_app():
     user = st.session_state.user
     user_roles = st.session_state.user_roles
     
-    # Header with user info
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.subheader("Pagos")
-    with col2:
-        st.markdown(f"**Usuario:** {user['name']}")
-    with col3:
-        if st.button("Cerrar Sesión"):
-            st.session_state.user = None
-            st.session_state.user_roles = []
-            st.session_state.otp_sent = False
-            st.session_state.otp_email = ""
-            st.session_state.otp_sent_time = 0
-            st.rerun()
+    # Main header
+    st.subheader("Pagos")
+    
+    # User info and logout in sidebar
+    st.sidebar.markdown(f"**Usuario:** {user['name']}")
+    if st.sidebar.button("Cerrar Sesión"):
+        st.session_state.user = None
+        st.session_state.user_roles = []
+        st.session_state.otp_sent = False
+        st.session_state.otp_email = ""
+        st.session_state.otp_sent_time = 0
+        st.rerun()
     
     st.markdown("---")
     
