@@ -1,0 +1,14 @@
+{
+  "name": "pagos-cursor",
+  "version": "1.0.0",
+  "description": "Pagos - Expense Management System (Python/Streamlit)",
+  "engines": {
+    "node": "none"
+  },
+  "scripts": {
+    "start": "echo 'This is a Python application. Use: streamlit run app.py'"
+  },
+  "keywords": ["python", "streamlit", "expense-management"],
+  "author": "Samuel",
+  "license": "MIT"
+} 

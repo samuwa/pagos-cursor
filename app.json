@@ -1,0 +1,27 @@
+{
+  "name": "Pagos - Expense Management System",
+  "description": "A comprehensive expense management system built with Python and Streamlit",
+  "repository": "https://github.com/samuwa/pagos-cursor",
+  "keywords": ["python", "streamlit", "expense-management", "supabase"],
+  "env": {
+    "SUPABASE_URL": {
+      "description": "Your Supabase project URL",
+      "required": true
+    },
+    "SUPABASE_ANON_KEY": {
+      "description": "Your Supabase anonymous key",
+      "required": true
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  }
+} 
