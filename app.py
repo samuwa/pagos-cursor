@@ -30,7 +30,6 @@ if 'otp_sent_time' not in st.session_state:
 
 def login_page():
     """Login interface with email OTP"""
-    st.subheader("Pagos")
     st.markdown("---")
     
     # Center the login form
@@ -111,7 +110,6 @@ def main_app():
     user_roles = st.session_state.user_roles
     
     # Main header
-    st.subheader("Pagos")
     
     # User info and logout in sidebar
     st.sidebar.markdown(f"**Usuario:** {user['name']}")
