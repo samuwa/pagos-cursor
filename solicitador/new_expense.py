@@ -3,22 +3,22 @@ from functions.f_cud import create_expense
 from datetime import datetime
 import uuid
 
-st.title("➕ Nuevo Gasto")
+st.subheader("Nuevo Gasto")
 
 # Get current user
 user = st.session_state.user
 
 if not user:
-    st.error("❌ No hay usuario autenticado.")
+    st.error("No hay usuario autenticado.")
     st.stop()
 
 # Expense form
 with st.form("new_expense_form"):
-    st.subheader("📝 Detalles del Gasto")
+    st.subheader("Detalles del Gasto")
     
     # Basic information
     description = st.text_area(
-        "📝 Descripción del gasto",
+        "Descripción del gasto",
         placeholder="Describe el gasto en detalle...",
         height=100
     )
@@ -27,7 +27,7 @@ with st.form("new_expense_form"):
     
     with col1:
         amount = st.number_input(
-            "💰 Monto ($)",
+            "Monto ($)",
             min_value=0.01,
             max_value=100000.00,
             step=0.01,
@@ -59,7 +59,7 @@ with st.form("new_expense_form"):
         )
     
     # Additional details
-    st.subheader("📋 Información Adicional")
+    st.subheader("Información Adicional")
     
     col1, col2 = st.columns(2)
     
@@ -76,7 +76,7 @@ with st.form("new_expense_form"):
     
     with col2:
         payment_method = st.selectbox(
-            "💳 Método de pago",
+            "Método de pago",
             ["Efectivo", "Tarjeta de crédito", "Tarjeta de débito", "Transferencia", "Otro"]
         )
         
@@ -127,12 +127,12 @@ with st.form("new_expense_form"):
             new_expense = create_expense(expense_data)
             
             if new_expense:
-                st.success("✅ Gasto enviado exitosamente!")
+                st.success("Gasto enviado exitosamente!")
                 st.balloons()
                 
                 # Show summary
                 st.markdown("---")
-                st.subheader("📋 Resumen del Gasto")
+                st.subheader("Resumen del Gasto")
                 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -148,19 +148,19 @@ with st.form("new_expense_form"):
                     st.write(f"**Proveedor:** {new_expense.get('vendor', 'N/A')}")
                 
                 # Next steps
-                st.info("📝 Tu gasto ha sido enviado para aprobación. Recibirás una notificación cuando sea revisado.")
+                st.info("Tu gasto ha sido enviado para aprobación. Recibirás una notificación cuando sea revisado.")
                 
                 # Clear form
                 st.rerun()
             else:
-                st.error("❌ Error al crear el gasto. Por favor intenta de nuevo.")
+                st.error("Error al crear el gasto. Por favor intenta de nuevo.")
         else:
-            st.error("❌ Por favor completa la descripción y el monto del gasto.")
+            st.error("Por favor completa la descripción y el monto del gasto.")
 
 # Help section
 with st.expander("❓ ¿Cómo funciona?"):
     st.markdown("""
-    ### 📋 Proceso de Solicitud de Gastos
+    ### Proceso de Solicitud de Gastos
     
     1. **Completa el formulario** con todos los detalles del gasto
     2. **Adjunta el recibo** si está disponible
@@ -184,4 +184,4 @@ st.subheader("🕒 Tus Gastos Recientes")
 
 # This would show the user's recent expenses
 # For now, just a placeholder
-st.info("📝 Aquí verás tus gastos más recientes una vez que los crees.") 
+    st.info("Aquí verás tus gastos más recientes una vez que los crees.") 
