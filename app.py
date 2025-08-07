@@ -141,7 +141,7 @@ def main_app():
         pages["Administración"] = [
             st.Page("admin/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
             st.Page("admin/users.py", title="Usuarios", icon=":material/people:"),
-            st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:", pathname="admin-expenses"),
+            st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:", url_path="admin-expenses"),
             st.Page("admin/reports.py", title="Reportes", icon=":material/analytics:"),
         ]
     
@@ -171,7 +171,7 @@ def main_app():
     if 'viewer' in user_roles:
         pages["Vista General"] = [
             st.Page("vista/overview.py", title="Vista General", icon=":material/visibility:"),
-            st.Page("vista/expenses.py", title="Gastos", icon=":material/receipt:", pathname="viewer-expenses"),
+            st.Page("vista/expenses.py", title="Gastos", icon=":material/receipt:", url_path="viewer-expenses"),
         ]
     
     # Create navigation
