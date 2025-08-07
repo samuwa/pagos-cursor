@@ -30,7 +30,6 @@ if 'otp_sent_time' not in st.session_state:
 
 def login_page():
     """Login interface with email OTP"""
-    st.markdown("---")
     
     # Center the login form
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -109,7 +108,6 @@ def main_app():
     user = st.session_state.user
     user_roles = st.session_state.user_roles
     
-    # Main header
     
     # User info and logout in sidebar
     st.sidebar.markdown(f"**Usuario:** {user['name']}")
@@ -120,8 +118,7 @@ def main_app():
         st.session_state.otp_email = ""
         st.session_state.otp_sent_time = 0
         st.rerun()
-    
-    st.markdown("---")
+
     
     # Create navigation based on user roles
     pages = {}
@@ -144,7 +141,7 @@ def main_app():
         pages["Administración"] = [
             st.Page("admin/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
             st.Page("admin/users.py", title="Usuarios", icon=":material/people:"),
-            st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:"),
+            st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:", pathname="admin-expenses"),
             st.Page("admin/reports.py", title="Reportes", icon=":material/analytics:"),
         ]
     
@@ -174,7 +171,7 @@ def main_app():
     if 'viewer' in user_roles:
         pages["Vista General"] = [
             st.Page("vista/overview.py", title="Vista General", icon=":material/visibility:"),
-            st.Page("vista/expenses.py", title="Gastos", icon=":material/receipt:"),
+            st.Page("vista/expenses.py", title="Gastos", icon=":material/receipt:", pathname="viewer-expenses"),
         ]
     
     # Create navigation
