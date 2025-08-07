@@ -135,6 +135,9 @@ def main_app():
     # Create navigation based on user roles
     pages = {}
     
+    # Debug: Show user roles
+    st.sidebar.write(f"**Roles del usuario:** {user_roles}")
+    
     # Admin pages
     if 'admin' in user_roles:
         pages["Administración"] = [
@@ -166,8 +169,8 @@ def main_app():
             st.Page("pagador/paid.py", title="Pagados", icon=":material/done:"),
         ]
     
-    # Viewer pages (if any user has viewer role)
-    if 'viewer' in user_roles or not pages:  # Show viewer pages if no other roles
+    # Viewer pages (only if user has viewer role)
+    if 'viewer' in user_roles:
         pages["Vista General"] = [
             st.Page("vista/overview.py", title="Vista General", icon=":material/visibility:"),
             st.Page("vista/expenses.py", title="Gastos", icon=":material/receipt:"),
