@@ -53,8 +53,7 @@ def verify_otp(email: str, otp: str) -> Optional[Dict[str, Any]]:
                 return {
                     'id': user_data.data['id'],
                     'name': user_data.data['name'],
-                    'email': user_data.data['email'],
-                    'stytch_user_id': user_data.data['stytch_user_id']
+                    'email': user_data.data['email']
                 }
         return None
     except Exception as e:

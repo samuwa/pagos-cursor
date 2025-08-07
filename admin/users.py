@@ -73,8 +73,7 @@ with tab2:
                 # Create user
                 user_data = {
                     "name": name,
-                    "email": email,
-                    "stytch_user_id": None  # Will be set by auth system
+                    "email": email
                 }
                 
                 new_user = create_user(user_data)

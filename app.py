@@ -103,12 +103,7 @@ def login_page():
                     else:
                         st.warning("Por favor ingresa el código de 6 dígitos.")
             
-            # Show remaining time
-            remaining_time = int(300 - (time.time() - st.session_state.otp_sent_time))
-            if remaining_time > 0:
-                minutes = remaining_time // 60
-                seconds = remaining_time % 60
-                st.info(f"Tiempo restante: {minutes}:{seconds:02d}")
+
 
 def main_app():
     """Main application with role-based navigation"""
