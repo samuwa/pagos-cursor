@@ -3,7 +3,7 @@ from functions.f_read import get_expenses_by_user, get_expense_by_id
 from functions.f_cud import update_expense, delete_expense
 from datetime import datetime
 
-st.title("📝 Mis Gastos")
+st.subheader("Mis Gastos")
 
 # Get current user
 user = st.session_state.user

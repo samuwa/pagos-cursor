@@ -3,7 +3,7 @@ from functions.f_read import get_approved_expenses, get_user_by_id
 from functions.f_cud import mark_expense_as_paid
 from datetime import datetime, timedelta
 
-st.title("💳 Gastos Por Pagar")
+st.subheader("Gastos Por Pagar")
 
 # Get current user
 user = st.session_state.user

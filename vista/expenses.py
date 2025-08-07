@@ -3,7 +3,7 @@ from functions.f_read import get_all_expenses, get_expenses_by_phase, get_user_b
 from functions.f_read import search_expenses, get_expenses_by_date_range, get_expenses_by_amount_range
 from datetime import datetime, timedelta
 
-st.title("Vista de Gastos")
+st.subheader("Vista de Gastos")
 
 # Get current user
 user = st.session_state.user

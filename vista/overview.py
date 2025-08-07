@@ -4,7 +4,7 @@ from functions.f_read import get_pending_expenses, get_approved_expenses, get_pa
 import plotly.express as px
 from datetime import datetime, timedelta
 
-st.title("Vista General")
+st.subheader("Vista General")
 
 # Get current user
 user = st.session_state.user

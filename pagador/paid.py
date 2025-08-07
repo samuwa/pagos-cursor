@@ -2,7 +2,7 @@ import streamlit as st
 from functions.f_read import get_paid_expenses, get_user_by_id
 from datetime import datetime, timedelta
 
-st.title("✅ Gastos Pagados")
+st.subheader("Gastos Pagados")
 
 # Get current user
 user = st.session_state.user

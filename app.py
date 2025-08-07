@@ -10,7 +10,7 @@ load_dotenv()
 
 # Page configuration
 st.set_page_config(
-    page_title="Pagos - Sistema de Gastos",
+    page_title="Pagos",
     page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -30,7 +30,7 @@ if 'otp_sent_time' not in st.session_state:
 
 def login_page():
     """Login interface with email OTP"""
-    st.title("Pagos - Sistema de Gastos")
+    st.subheader("Pagos")
     st.markdown("---")
     
     # Center the login form
@@ -113,7 +113,7 @@ def main_app():
     # Header with user info
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        st.title("Pagos - Sistema de Gastos")
+        st.subheader("Pagos")
     with col2:
         st.markdown(f"**Usuario:** {user['name']}")
     with col3:

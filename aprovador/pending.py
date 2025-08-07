@@ -3,7 +3,7 @@ from functions.f_read import get_pending_expenses, get_user_by_id
 from functions.f_cud import approve_expense, reject_expense
 from datetime import datetime
 
-st.title("⏳ Gastos Pendientes")
+st.subheader("Gastos Pendientes")
 
 # Get current user
 user = st.session_state.user
