@@ -3,24 +3,24 @@ from functions.f_read import get_all_users, get_user_roles, get_users_by_role
 from functions.f_cud import create_user, update_user, assign_role_to_user, remove_role_from_user
 from functions.f_read import get_user_by_id
 
-st.title("👥 Gestión de Usuarios")
+st.title("Gestión de Usuarios")
 
 # Get all users
 users = get_all_users()
 
 # User management tabs
-tab1, tab2, tab3 = st.tabs(["📋 Lista de Usuarios", "➕ Crear Usuario", "🔧 Editar Usuario"])
+tab1, tab2, tab3 = st.tabs(["Lista de Usuarios", "Crear Usuario", "Editar Usuario"])
 
 with tab1:
-    st.subheader("📋 Lista de Usuarios")
+    st.subheader("Lista de Usuarios")
     
     if users:
         # Search and filter
         col1, col2 = st.columns(2)
         with col1:
-            search_term = st.text_input("🔍 Buscar usuario", placeholder="Nombre o email...")
+            search_term = st.text_input("Buscar usuario", placeholder="Nombre o email...")
         with col2:
-            role_filter = st.selectbox("🎭 Filtrar por rol", ["Todos", "admin", "requester", "approver", "payer", "viewer"])
+            role_filter = st.selectbox("Filtrar por rol", ["Todos", "admin", "requester", "approver", "payer", "viewer"])
         
         # Filter users
         filtered_users = users

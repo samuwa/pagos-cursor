@@ -1,37 +1,37 @@
 import streamlit as st
-from functions.f_read import get_all_expenses, get_expenses_by_status, get_user_by_id
+from functions.f_read import get_all_expenses, get_expenses_by_phase, get_user_by_id
 from functions.f_read import search_expenses, get_expenses_by_date_range, get_expenses_by_amount_range
 from datetime import datetime, timedelta
 
-st.title("📋 Vista de Gastos")
+st.title("Vista de Gastos")
 
 # Get current user
 user = st.session_state.user
 
 if not user:
-    st.error("❌ No hay usuario autenticado.")
+    st.error("No hay usuario autenticado.")
     st.stop()
 
 # Filters
-st.subheader("🔍 Filtros")
+st.subheader("Filtros")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     status_filter = st.selectbox(
-        "📊 Estado",
-        ["Todos", "pending", "approved", "rejected", "paid"]
+        "Estado",
+        ["Todos", "Creado", "Aprobado", "Rechazado", "Pagado"]
     )
 
 with col2:
     category_filter = st.selectbox(
-        "📂 Categoría",
+        "Categoría",
         ["Todas", "Alimentación", "Transporte", "Hospedaje", "Materiales", "Equipamiento", "Servicios", "Otros"]
     )
 
 with col3:
     priority_filter = st.selectbox(
-        "⚡ Prioridad",
+        "Prioridad",
         ["Todas", "Baja", "Media", "Alta", "Urgente"]
     )
 
@@ -40,14 +40,14 @@ col1, col2 = st.columns(2)
 
 with col1:
     date_range = st.date_input(
-        "📅 Rango de fechas",
+        "Rango de fechas",
         value=(datetime.now() - timedelta(days=30), datetime.now()),
         max_value=datetime.now()
     )
 
 with col2:
     amount_range = st.slider(
-        "💰 Rango de monto",
+        "Rango de monto",
         min_value=0.0,
         max_value=10000.0,
         value=(0.0, 10000.0),
@@ -56,7 +56,7 @@ with col2:
 
 # Search
 search_query = st.text_input(
-    "🔍 Buscar gastos",
+    "Buscar gastos",
     placeholder="Buscar en descripción o categoría..."
 )
 
@@ -64,7 +64,7 @@ search_query = st.text_input(
 if status_filter == "Todos":
     expenses = get_all_expenses()
 else:
-    expenses = get_expenses_by_status(status_filter)
+    expenses = get_expenses_by_phase(status_filter)
 
 # Apply additional filters
 if category_filter != "Todas":
@@ -91,26 +91,26 @@ if expenses:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("📋 Total Gastos", len(expenses))
+        st.metric("Total Gastos", len(expenses))
     
     with col2:
-        st.metric("💰 Monto Total", f"${total_amount:,.2f}")
+        st.metric("Monto Total", f"${total_amount:,.2f}")
     
     with col3:
-        st.metric("📊 Promedio", f"${avg_amount:,.2f}")
+        st.metric("Promedio", f"${avg_amount:,.2f}")
     
     with col4:
         # Count by status
         status_counts = {}
         for expense in expenses:
-            status = expense['status']
+            status = expense['phase']
             status_counts[status] = status_counts.get(status, 0) + 1
         
         most_common_status = max(status_counts.items(), key=lambda x: x[1])[0] if status_counts else 'N/A'
-        st.metric("📊 Estado más común", most_common_status)
+        st.metric("Estado más común", most_common_status)
 
 # Display expenses
-st.subheader(f"📋 Gastos ({len(expenses)})")
+st.subheader(f"Gastos ({len(expenses)})")
 
 if expenses:
     # Sort by creation date (newest first)
@@ -123,13 +123,13 @@ if expenses:
         
         # Status color
         status_colors = {
-            'pending': '🟡',
-            'approved': '🟢',
-            'rejected': '🔴',
-            'paid': '🟦'
+            'Creado': '🟡',
+            'Aprobado': '🟢',
+            'Rechazado': '🔴',
+            'Pagado': '🟦'
         }
         
-        status_icon = status_colors.get(expense['status'], '⚪')
+        status_icon = status_colors.get(expense['phase'], '⚪')
         
         with st.expander(f"{status_icon} ${expense['amount']:.2f} - {expense['description']} (por {requester_name})"):
             col1, col2, col3 = st.columns([2, 2, 1])
@@ -149,19 +149,19 @@ if expenses:
                 st.write(f"**Método de pago:** {expense.get('payment_method', 'N/A')}")
             
             with col3:
-                if st.button("👁️ Ver Detalles", key=f"view_{expense['id']}"):
+                if st.button("Ver Detalles", key=f"view_{expense['id']}"):
                     st.session_state.view_expense = expense
                     st.rerun()
             
             # Show comments if any
             if expense.get('comments'):
                 st.markdown("---")
-                st.write("**💬 Comentarios del solicitante:**")
+                st.write("**Comentarios del solicitante:**")
                 st.write(expense['comments'])
             
             if expense.get('approver_comments'):
                 st.markdown("---")
-                st.write("**💬 Comentarios del aprobador:**")
+                st.write("**Comentarios del aprobador:**")
                 st.write(expense['approver_comments'])
     
     # View expense details
@@ -172,7 +172,7 @@ if expenses:
         payer = get_user_by_id(expense['paid_by']) if expense.get('paid_by') else None
         
         st.markdown("---")
-        st.subheader("👁️ Detalles del Gasto")
+        st.subheader("Detalles del Gasto")
         
         col1, col2 = st.columns(2)
         
@@ -204,31 +204,31 @@ if expenses:
         
         if expense.get('comments'):
             st.markdown("---")
-            st.write("**💬 Comentarios del solicitante:**")
+            st.write("**Comentarios del solicitante:**")
             st.write(expense['comments'])
         
         if expense.get('approver_comments'):
             st.markdown("---")
-            st.write("**💬 Comentarios del aprobador:**")
+            st.write("**Comentarios del aprobador:**")
             st.write(expense['approver_comments'])
         
-        if st.button("❌ Cerrar"):
+        if st.button("Cerrar"):
             del st.session_state.view_expense
             st.rerun()
 
 else:
-    st.info("📝 No hay gastos que coincidan con los filtros aplicados.")
+    st.info("No hay gastos que coincidan con los filtros aplicados.")
 
 # Quick actions
 st.markdown("---")
-st.subheader("⚡ Acciones Rápidas")
+st.subheader("Acciones Rápidas")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("👁️ Ver Vista General", use_container_width=True):
+    if st.button("Ver Vista General", use_container_width=True):
         st.switch_page("vista/overview.py")
 
 with col2:
-    if st.button("📊 Ver Estadísticas", use_container_width=True):
-        st.info("📈 Funcionalidad de estadísticas en desarrollo...") 
+    if st.button("Ver Estadísticas", use_container_width=True):
+        st.info("Funcionalidad de estadísticas en desarrollo...") 

@@ -11,7 +11,7 @@ load_dotenv()
 # Page configuration
 st.set_page_config(
     page_title="Pagos - Sistema de Gastos",
-    page_icon="💰",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -133,49 +133,49 @@ def main_app():
     st.markdown("---")
     
     # Create navigation based on user roles
-    pages = []
+    pages = {}
     
     # Admin pages
     if 'admin' in user_roles:
-        pages.extend([
+        pages["Administración"] = [
             st.Page("admin/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
             st.Page("admin/users.py", title="Usuarios", icon=":material/people:"),
             st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:"),
             st.Page("admin/reports.py", title="Reportes", icon=":material/analytics:"),
-        ])
+        ]
     
     # Requester pages
     if 'requester' in user_roles:
-        pages.extend([
+        pages["Solicitudes"] = [
             st.Page("solicitador/new_expense.py", title="Nuevo Gasto", icon=":material/add:"),
             st.Page("solicitador/my_expenses.py", title="Mis Gastos", icon=":material/list:"),
-        ])
+        ]
     
     # Approver pages
     if 'approver' in user_roles:
-        pages.extend([
+        pages["Aprobaciones"] = [
             st.Page("aprovador/pending.py", title="Pendientes", icon=":material/pending:"),
             st.Page("aprovador/approved.py", title="Aprobados", icon=":material/check_circle:"),
             st.Page("aprovador/rejected.py", title="Rechazados", icon=":material/cancel:"),
-        ])
+        ]
     
     # Payer pages
     if 'payer' in user_roles:
-        pages.extend([
+        pages["Pagos"] = [
             st.Page("pagador/to_pay.py", title="Por Pagar", icon=":material/payment:"),
             st.Page("pagador/paid.py", title="Pagados", icon=":material/done:"),
-        ])
+        ]
     
     # Viewer pages (if any user has viewer role)
     if 'viewer' in user_roles or not pages:  # Show viewer pages if no other roles
-        pages.extend([
+        pages["Vista General"] = [
             st.Page("vista/overview.py", title="Vista General", icon=":material/visibility:"),
             st.Page("vista/expenses.py", title="Gastos", icon=":material/receipt:"),
-        ])
+        ]
     
     # Create navigation
     if pages:
-        pg = st.navigation(pages, position="sidebar", expanded=True)
+        pg = st.navigation(pages, position="top", expanded=True)
         pg.run()
     else:
         st.warning("No tienes permisos para acceder a ninguna página. Contacta al administrador.")
