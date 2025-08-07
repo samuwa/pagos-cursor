@@ -187,11 +187,17 @@ def mark_expense_as_paid(expense_id: str, payer_id: str, payment_date: str = Non
 def create_user(user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Create a new user"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot create user.")
             return None
             
-        response = supabase.table('users').insert(user_data).execute()
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        response = supabase_admin.table('users').insert(user_data).execute()
         return response.data[0] if response.data else None
     except Exception as e:
         st.error(f"Error creating user: {str(e)}")
@@ -200,11 +206,17 @@ def create_user(user_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 def update_user(user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Update an existing user"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot update user.")
             return None
             
-        response = supabase.table('users').update(update_data).eq('id', user_id).execute()
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        response = supabase_admin.table('users').update(update_data).eq('id', user_id).execute()
         return response.data[0] if response.data else None
     except Exception as e:
         st.error(f"Error updating user: {str(e)}")
@@ -213,16 +225,22 @@ def update_user(user_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str,
 def assign_role_to_user(user_id: str, role: str) -> bool:
     """Assign a role to a user"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for role management
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot assign role.")
             return False
             
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
         role_data = {
             'user_id': user_id,
             'role': role
         }
         
-        response = supabase.table('user_roles').insert(role_data).execute()
+        response = supabase_admin.table('user_roles').insert(role_data).execute()
         return len(response.data) > 0
     except Exception as e:
         st.error(f"Error assigning role: {str(e)}")
@@ -231,11 +249,17 @@ def assign_role_to_user(user_id: str, role: str) -> bool:
 def remove_role_from_user(user_id: str, role: str) -> bool:
     """Remove a role from a user"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for role management
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot remove role.")
             return False
             
-        response = supabase.table('user_roles').delete().eq('user_id', user_id).eq('role', role).execute()
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        response = supabase_admin.table('user_roles').delete().eq('user_id', user_id).eq('role', role).execute()
         return len(response.data) > 0
     except Exception as e:
         st.error(f"Error removing role: {str(e)}")
