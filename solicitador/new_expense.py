@@ -184,4 +184,4 @@ st.subheader("🕒 Tus Gastos Recientes")
 
 # This would show the user's recent expenses
 # For now, just a placeholder
-    st.info("Aquí verás tus gastos más recientes una vez que los crees.") 
+st.info("Aquí verás tus gastos más recientes una vez que los crees.") 
