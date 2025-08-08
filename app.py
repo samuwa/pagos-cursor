@@ -141,6 +141,7 @@ def main_app():
         pages["Administración"] = [
             st.Page("admin/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
             st.Page("admin/users.py", title="Usuarios", icon=":material/people:"),
+            st.Page("admin/categories.py", title="Categorías", icon=":material/category:"),
             st.Page("admin/expenses.py", title="Todos los Gastos", icon=":material/receipt:", url_path="admin-expenses"),
             st.Page("admin/reports.py", title="Reportes", icon=":material/analytics:"),
         ]

@@ -288,7 +288,45 @@ def remove_role_from_user(user_id: str, role: str) -> bool:
         supabase_admin = create_client(url, service_key)
         
         response = supabase_admin.table('user_roles').delete().eq('user_id', user_id).eq('role', role).execute()
-        return len(response.data) > 0
+        return True
     except Exception as e:
         st.error(f"Error removing role: {str(e)}")
-        return False 
+        return False
+
+def create_category(category_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Create a new category"""
+    try:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot create category.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        response = supabase_admin.table('categories').insert(category_data).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        st.error(f"Error creating category: {str(e)}")
+        return None
+
+def create_account(account_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Create a new account"""
+    try:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot create account.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        response = supabase_admin.table('accounts').insert(account_data).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        st.error(f"Error creating account: {str(e)}")
+        return None 
