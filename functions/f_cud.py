@@ -83,14 +83,42 @@ def get_user_roles(user_id: str) -> List[str]:
         return []
 
 def create_expense(expense_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Create a new expense"""
+    """Create a new expense with multiple categories and accounts"""
     try:
-        supabase = get_supabase_client()
-        if not supabase:
+        # Use service role key to bypass RLS for expense creation
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot create expense.")
             return None
             
-        response = supabase.table('expenses').insert(expense_data).execute()
-        return response.data[0] if response.data else None
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        # Extract category and account IDs for junction tables
+        category_ids = expense_data.pop('category_ids', [])
+        account_ids = expense_data.pop('account_ids', [])
+        
+        # Create the expense first
+        expense_response = supabase_admin.table('expenses').insert(expense_data).execute()
+        if not expense_response.data:
+            st.error("Failed to create expense")
+            return None
+            
+        expense = expense_response.data[0]
+        expense_id = expense['id']
+        
+        # Add category relationships
+        if category_ids:
+            category_relations = [{'expense_id': expense_id, 'category_id': cat_id} for cat_id in category_ids]
+            supabase_admin.table('expense_categories').insert(category_relations).execute()
+        
+        # Add account relationships
+        if account_ids:
+            account_relations = [{'expense_id': expense_id, 'account_id': acc_id} for acc_id in account_ids]
+            supabase_admin.table('expense_accounts').insert(account_relations).execute()
+        
+        return expense
     except Exception as e:
         st.error(f"Error creating expense: {str(e)}")
         return None

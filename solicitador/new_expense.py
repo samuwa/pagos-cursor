@@ -1,9 +1,8 @@
 import streamlit as st
+from functions.f_read import get_categories, get_accounts_by_category
 from functions.f_cud import create_expense
 from datetime import datetime
 import uuid
-
-st.subheader("Nuevo Gasto")
 
 # Get current user
 user = st.session_state.user
@@ -12,46 +11,84 @@ if not user:
     st.error("No hay usuario autenticado.")
     st.stop()
 
-# Expense form
-with st.form("new_expense_form"):
-    st.subheader("Detalles del Gasto")
-    
-    # Basic information
-    description = st.text_area(
-        "Descripción del gasto",
-        placeholder="Describe el gasto en detalle...",
-        height=100
+st.subheader("Nuevo Gasto")
+
+# Basic information
+st.subheader("Información Básica")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    description = st.text_input(
+        "📝 Descripción del gasto",
+        placeholder="Descripción detallada del gasto"
     )
     
-    col1, col2 = st.columns(2)
+    amount = st.number_input(
+        "💰 Monto",
+        min_value=0.01,
+        value=0.01,
+        step=0.01,
+        format="%.2f"
+    )
+
+with col2:
+    expense_date = st.date_input(
+        "📅 Fecha del gasto",
+        value=datetime.now().date()
+    )
+
+# Category and Account selection
+st.subheader("Categorización")
+
+# Get all categories
+categories = get_categories()
+
+if not categories:
+    st.error("No se pudieron cargar las categorías.")
+    st.stop()
+
+# Create category options
+category_options = {cat['description']: cat['id'] for cat in categories}
+category_names = list(category_options.keys())
+
+# Multiple category selection
+selected_categories = st.multiselect(
+    "📂 Categorías",
+    options=category_names,
+    help="Selecciona una o más categorías para este gasto"
+)
+
+# Account selection based on selected categories
+selected_accounts = []
+if selected_categories:
+    # Get all accounts for the selected categories
+    all_accounts = []
+    for category_name in selected_categories:
+        category_id = category_options[category_name]
+        accounts = get_accounts_by_category(category_id)
+        all_accounts.extend(accounts)
     
-    with col1:
-        amount = st.number_input(
-            "Monto ($)",
-            min_value=0.01,
-            max_value=100000.00,
-            step=0.01,
-            format="%.2f"
+    if all_accounts:
+        # Remove duplicates and create options
+        unique_accounts = {}
+        for acc in all_accounts:
+            unique_accounts[acc['description']] = acc['id']
+        
+        account_names = list(unique_accounts.keys())
+        
+        selected_account_names = st.multiselect(
+            "💳 Cuentas",
+            options=account_names,
+            help="Selecciona una o más cuentas para este gasto"
         )
         
-        category = st.selectbox(
-            "📂 Categoría",
-            [
-                "Alimentación",
-                "Transporte",
-                "Hospedaje",
-                "Materiales",
-                "Equipamiento",
-                "Servicios",
-                "Otros"
-            ]
-        )
-    
-    with col2:
-        expense_date = st.date_input(
-            "📅 Fecha del gasto",
-            value=datetime.now().date()
-        )
+        # Convert selected account names to IDs
+        selected_accounts = [unique_accounts[name] for name in selected_account_names]
+    else:
+        st.warning("No hay cuentas disponibles para las categorías seleccionadas.")
+else:
+    st.info("Selecciona al menos una categoría para ver las cuentas disponibles.")
     
     # Additional details
     st.subheader("Información Adicional")
@@ -109,28 +146,23 @@ with st.form("new_expense_form"):
     # Comments
     comments = st.text_area(
         "💬 Comentarios adicionales",
-        placeholder="Información adicional que consideres relevante...",
-        height=80
-    )
-    
-    # File upload (for receipts)
-    uploaded_file = st.file_uploader(
-        "📎 Adjuntar recibo/factura",
-        type=['pdf', 'png', 'jpg', 'jpeg'],
-        help="Sube una imagen o PDF del recibo o factura"
+        placeholder="Comentarios adicionales sobre el gasto...",
+        height=100
     )
     
     # Submit button
-    submitted = st.form_submit_button("🚀 Enviar Gasto", use_container_width=True)
-    
-    if submitted:
-        if description and amount > 0:
+    if st.button("💾 Crear Gasto", type="primary"):
+        # Validation
+        if not description or not amount or not selected_categories or not selected_accounts:
+            st.error("Por favor completa todos los campos obligatorios: descripción, monto, categorías y cuentas.")
+        else:
             # Create expense data
             expense_data = {
                 "user_id": user["id"],
                 "description": description,
                 "amount": amount,
-                "category": category,
+                "category_ids": [category_options[cat] for cat in selected_categories],
+                "account_ids": selected_accounts,
                 "expense_date": expense_date.strftime("%Y-%m-%d"),
                 "vendor": vendor,
                 "quotation_file": quotation_file.name if quotation_file else None,
@@ -149,34 +181,8 @@ with st.form("new_expense_form"):
                 })
             
             # Create the expense
-            new_expense = create_expense(expense_data)
-            
-            if new_expense:
-                st.success("Gasto enviado exitosamente!")
+            if create_expense(expense_data):
+                st.success("✅ Gasto creado exitosamente!")
                 st.balloons()
-                
-                # Show summary
-                st.markdown("---")
-                st.subheader("Resumen del Gasto")
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.write(f"**ID:** {new_expense['id']}")
-                    st.write(f"**Descripción:** {new_expense['description']}")
-                    st.write(f"**Monto:** ${new_expense['amount']:.2f}")
-                    st.write(f"**Categoría:** {new_expense['category']}")
-                
-                with col2:
-                    st.write(f"**Estado:** {new_expense['status']}")
-                    st.write(f"**Fecha:** {new_expense['expense_date']}")
-                    st.write(f"**Proveedor:** {new_expense.get('vendor', 'N/A')}")
-                
-                # Next steps
-                st.info("Tu gasto ha sido enviado para aprobación. Recibirás una notificación cuando sea revisado.")
-                
-                # Clear form
-                st.rerun()
             else:
-                st.error("Error al crear el gasto. Por favor intenta de nuevo.")
-        else:
-            st.error("Por favor completa la descripción y el monto del gasto.") 
+                st.error("❌ Error al crear el gasto. Por favor intenta de nuevo.") 

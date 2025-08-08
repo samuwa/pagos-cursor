@@ -352,4 +352,17 @@ def get_receivers() -> List[Dict[str, Any]]:
         return response.data
     except Exception as e:
         st.error(f"Error getting receivers: {str(e)}")
+        return []
+
+def get_accounts_by_category(category_id: int) -> List[Dict[str, Any]]:
+    """Get accounts by category ID"""
+    try:
+        supabase = get_supabase_client()
+        if not supabase:
+            return []
+            
+        response = supabase.table('accounts').select('*').eq('category_id', category_id).is_('deleted_at', 'null').execute()
+        return response.data
+    except Exception as e:
+        st.error(f"Error getting accounts by category: {str(e)}")
         return [] 
