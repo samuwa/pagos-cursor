@@ -164,8 +164,9 @@ def main_app():
     # Payer pages
     if 'payer' in user_roles:
         pages["Pagos"] = [
-            st.Page("pagador/to_pay.py", title="Por Pagar", icon=":material/payment:"),
-            st.Page("pagador/paid.py", title="Pagados", icon=":material/done:"),
+            st.Page("pagador/to_pay.py", title="Por Pagar", icon=":material/pending:"),
+            st.Page("pagador/paid.py", title="Pagados", icon=":material/check_circle:"),
+            st.Page("pagador/upload_receipt.py", title="Subir Comprobante", icon=":material/upload:"),
         ]
     
     # Viewer pages (only if user has viewer role)

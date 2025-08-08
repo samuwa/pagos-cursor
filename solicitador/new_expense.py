@@ -1,6 +1,6 @@
 import streamlit as st
 from functions.f_read import get_categories, get_accounts_by_category
-from functions.f_cud import create_expense
+from functions.f_cud import create_expense, upload_file_to_supabase
 from datetime import datetime
 import uuid
 
@@ -89,100 +89,115 @@ if selected_categories:
         st.warning("No hay cuentas disponibles para las categorías seleccionadas.")
 else:
     st.info("Selecciona al menos una categoría para ver las cuentas disponibles.")
+
+# Additional details
+st.subheader("Información Adicional")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    vendor = st.text_input(
+        "🏢 Proveedor/Vendedor",
+        placeholder="Nombre del proveedor"
+    )
     
-    # Additional details
-    st.subheader("Información Adicional")
+    # File upload for quotation
+    quotation_file = st.file_uploader(
+        "📄 Cotización",
+        type=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+        help="Sube el archivo de la cotización (PDF, Word, o imagen)"
+    )
+
+with col2:
+    payment_method = st.selectbox(
+        "Método de pago",
+        ["Efectivo", "Tarjeta de crédito", "Tarjeta de débito", "Transferencia", "Otro"]
+    )
     
+    reimbursement_type = st.selectbox(
+        "Tipo de reembolso",
+        ["Reembolso directo", "Compra corporativa", "Otro"]
+    )
+
+# Reimbursement section
+st.subheader("Información de Reembolso")
+
+is_reimbursement = st.checkbox(
+    "💰 Es un reembolso",
+    help="Marca esta casilla si este gasto es un reembolso que necesitas recuperar"
+)
+
+if is_reimbursement:
     col1, col2 = st.columns(2)
     
     with col1:
-        vendor = st.text_input(
-            "🏢 Proveedor/Vendedor",
-            placeholder="Nombre del proveedor"
-        )
-        
-        # File upload for quotation
-        quotation_file = st.file_uploader(
-            "📄 Cotización",
-            type=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-            help="Sube el archivo de la cotización (PDF, Word, o imagen)"
+        reimbursement_recipient = st.text_input(
+            "👤 Recibidor del reembolso",
+            placeholder="Nombre de la persona que recibirá el reembolso",
+            help="Persona a quien se le hará el reembolso"
         )
     
     with col2:
-        payment_method = st.selectbox(
-            "Método de pago",
-            ["Efectivo", "Tarjeta de crédito", "Tarjeta de débito", "Transferencia", "Otro"]
+        reimbursement_method = st.selectbox(
+            "Método de reembolso",
+            ["Transferencia bancaria", "Efectivo", "Cheque", "Otro"]
         )
+
+# Comments
+comments = st.text_area(
+    "💬 Comentarios adicionales",
+    placeholder="Comentarios adicionales sobre el gasto...",
+    height=100
+)
+
+# Submit button
+if st.button("💾 Crear Gasto", type="primary"):
+    # Validation
+    if not description or not amount or not selected_categories or not selected_accounts:
+        st.error("Por favor completa todos los campos obligatorios: descripción, monto, categorías y cuentas.")
+    else:
+        # Upload quotation file if provided
+        quotation_info = None
+        if quotation_file:
+            quotation_info = upload_file_to_supabase(quotation_file, "quotes")
+            if not quotation_info:
+                st.error("Error al subir el archivo de cotización.")
+                st.stop()
         
-        reimbursement_type = st.selectbox(
-            "Tipo de reembolso",
-            ["Reembolso directo", "Compra corporativa", "Otro"]
-        )
-    
-    # Reimbursement section
-    st.subheader("Información de Reembolso")
-    
-    is_reimbursement = st.checkbox(
-        "💰 Es un reembolso",
-        help="Marca esta casilla si este gasto es un reembolso que necesitas recuperar"
-    )
-    
-    if is_reimbursement:
-        col1, col2 = st.columns(2)
+        # Create expense data
+        expense_data = {
+            "user_id": user["id"],
+            "description": description,
+            "amount": amount,
+            "category_ids": [category_options[cat] for cat in selected_categories],
+            "account_ids": selected_accounts,
+            "expense_date": expense_date.strftime("%Y-%m-%d"),
+            "vendor": vendor,
+            "payment_method": payment_method,
+            "reimbursement_type": reimbursement_type,
+            "notes": comments,
+            "status": "pending",
+            "is_reimbursement": is_reimbursement
+        }
         
-        with col1:
-            reimbursement_recipient = st.text_input(
-                "👤 Recibidor del reembolso",
-                placeholder="Nombre de la persona que recibirá el reembolso",
-                help="Persona a quien se le hará el reembolso"
-            )
+        # Add quotation info if uploaded
+        if quotation_info:
+            expense_data.update({
+                "quotation_file_url": quotation_info["file_url"],
+                "quotation_file_name": quotation_info["file_name"],
+                "quotation_file_size": quotation_info["file_size"]
+            })
         
-        with col2:
-            reimbursement_method = st.selectbox(
-                "Método de reembolso",
-                ["Transferencia bancaria", "Efectivo", "Cheque", "Otro"]
-            )
-    
-    # Comments
-    comments = st.text_area(
-        "💬 Comentarios adicionales",
-        placeholder="Comentarios adicionales sobre el gasto...",
-        height=100
-    )
-    
-    # Submit button
-    if st.button("💾 Crear Gasto", type="primary"):
-        # Validation
-        if not description or not amount or not selected_categories or not selected_accounts:
-            st.error("Por favor completa todos los campos obligatorios: descripción, monto, categorías y cuentas.")
+        # Add reimbursement fields if it's a reimbursement
+        if is_reimbursement:
+            expense_data.update({
+                "reimbursement_recipient": reimbursement_recipient,
+                "reimbursement_method": reimbursement_method
+            })
+        
+        # Create the expense
+        if create_expense(expense_data):
+            st.success("✅ Gasto creado exitosamente!")
+            st.balloons()
         else:
-            # Create expense data
-            expense_data = {
-                "user_id": user["id"],
-                "description": description,
-                "amount": amount,
-                "category_ids": [category_options[cat] for cat in selected_categories],
-                "account_ids": selected_accounts,
-                "expense_date": expense_date.strftime("%Y-%m-%d"),
-                "vendor": vendor,
-                "quotation_file": quotation_file.name if quotation_file else None,
-                "payment_method": payment_method,
-                "reimbursement_type": reimbursement_type,
-                "notes": comments,
-                "status": "pending",
-                "is_reimbursement": is_reimbursement
-            }
-            
-            # Add reimbursement fields if it's a reimbursement
-            if is_reimbursement:
-                expense_data.update({
-                    "reimbursement_recipient": reimbursement_recipient,
-                    "reimbursement_method": reimbursement_method
-                })
-            
-            # Create the expense
-            if create_expense(expense_data):
-                st.success("✅ Gasto creado exitosamente!")
-                st.balloons()
-            else:
-                st.error("❌ Error al crear el gasto. Por favor intenta de nuevo.") 
+            st.error("❌ Error al crear el gasto. Por favor intenta de nuevo.") 

@@ -3,6 +3,7 @@ import os
 from supabase import create_client, Client
 from typing import Dict, List, Optional, Any
 import time
+from datetime import datetime
 
 # Initialize Supabase client
 @st.cache_resource
@@ -329,4 +330,107 @@ def create_account(account_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         return response.data[0] if response.data else None
     except Exception as e:
         st.error(f"Error creating account: {str(e)}")
+        return None
+
+def upload_file_to_supabase(file, bucket_name: str = "quotes") -> Optional[Dict[str, Any]]:
+    """Upload file to Supabase Storage"""
+    try:
+        # Use service role key to bypass RLS for file uploads
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot upload file.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        # Generate unique filename
+        import uuid
+        file_extension = file.name.split('.')[-1] if '.' in file.name else ''
+        unique_filename = f"{uuid.uuid4()}.{file_extension}" if file_extension else f"{uuid.uuid4()}"
+        
+        # Upload file to Supabase Storage
+        response = supabase_admin.storage.from_(bucket_name).upload(
+            path=unique_filename,
+            file=file.getvalue(),
+            file_options={"content-type": file.type}
+        )
+        
+        # Get public URL
+        file_url = supabase_admin.storage.from_(bucket_name).get_public_url(unique_filename)
+        
+        return {
+            "file_url": file_url,
+            "file_name": file.name,
+            "file_size": len(file.getvalue()),
+            "storage_path": unique_filename
+        }
+    except Exception as e:
+        st.error(f"Error uploading file: {str(e)}")
+        return None
+
+def create_quote(quote_data: Dict[str, Any], file=None) -> Optional[Dict[str, Any]]:
+    """Create a new quote with optional file upload"""
+    try:
+        # Use service role key to bypass RLS for quote creation
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot create quote.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        # Upload file if provided
+        if file:
+            file_info = upload_file_to_supabase(file, "quotes")
+            if file_info:
+                quote_data.update({
+                    "file_url": file_info["file_url"],
+                    "file_name": file_info["file_name"],
+                    "file_size": file_info["file_size"]
+                })
+        
+        # Create quote
+        response = supabase_admin.table('quotes').insert(quote_data).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        st.error(f"Error creating quote: {str(e)}")
+        return None
+
+def upload_payment_receipt(expense_id: int, file, payer_id: str) -> Optional[Dict[str, Any]]:
+    """Upload payment receipt for an expense"""
+    try:
+        # Use service role key to bypass RLS for file uploads
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot upload receipt.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        # Upload file to receipts bucket
+        file_info = upload_file_to_supabase(file, "receipts")
+        if not file_info:
+            return None
+        
+        # Create receipt record
+        receipt_data = {
+            "expense_id": expense_id,
+            "payer_id": payer_id,
+            "file_url": file_info["file_url"],
+            "file_name": file_info["file_name"],
+            "file_size": file_info["file_size"],
+            "uploaded_at": datetime.now().isoformat()
+        }
+        
+        # Insert into receipts table (you may need to create this table)
+        response = supabase_admin.table('payment_receipts').insert(receipt_data).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        st.error(f"Error uploading payment receipt: {str(e)}")
         return None 
