@@ -15,8 +15,8 @@ with tab1:
     st.subheader("➕ Crear Nuevo Usuario")
     
     with st.form("create_user_form"):
-        name = st.text_input("Nombre completo", placeholder="Juan Pérez")
-        email = st.text_input("Email", placeholder="juan@empresa.com")
+        name = st.text_input("Nombre completo")
+        email = st.text_input("Email")
         
         # Role selection
         st.write("Asignar roles:")

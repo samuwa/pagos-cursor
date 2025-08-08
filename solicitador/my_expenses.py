@@ -211,18 +211,4 @@ if filtered_expenses:
             st.rerun()
 
 else:
-    st.info("📝 No tienes gastos registrados. ¡Crea tu primer gasto!")
-
-# Quick actions
-st.markdown("---")
-st.subheader("⚡ Acciones Rápidas")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("➕ Nuevo Gasto", use_container_width=True):
-        st.switch_page("solicitador/new_expense.py")
-
-with col2:
-    if st.button("📊 Ver Estadísticas", use_container_width=True):
-        st.info("📈 Funcionalidad de estadísticas en desarrollo...") 
+    st.success("🎉 ¡No hay gastos para mostrar!") 

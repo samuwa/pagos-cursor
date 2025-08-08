@@ -230,18 +230,4 @@ if filtered_expenses:
             st.rerun()
 
 else:
-    st.success("🎉 ¡No hay gastos pendientes de pago!")
-
-# Quick actions
-st.markdown("---")
-st.subheader("⚡ Acciones Rápidas")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("✅ Ver Pagados", use_container_width=True):
-        st.switch_page("pagador/paid.py")
-
-with col2:
-    if st.button("📊 Ver Estadísticas", use_container_width=True):
-        st.info("📈 Funcionalidad de estadísticas en desarrollo...") 
+    st.success("🎉 ¡No hay gastos por pagar!") 

@@ -230,22 +230,4 @@ if filtered_expenses:
             st.rerun()
 
 else:
-    st.success("🎉 ¡No hay gastos pendientes para revisar!")
-
-# Quick actions
-st.markdown("---")
-st.subheader("⚡ Acciones Rápidas")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    if st.button("✅ Ver Aprobados", use_container_width=True):
-        st.switch_page("aprovador/approved.py")
-
-with col2:
-    if st.button("❌ Ver Rechazados", use_container_width=True):
-        st.switch_page("aprovador/rejected.py")
-
-with col3:
-    if st.button("📊 Ver Estadísticas", use_container_width=True):
-        st.info("📈 Funcionalidad de estadísticas en desarrollo...") 
+    st.success("🎉 ¡No hay gastos pendientes para revisar!") 

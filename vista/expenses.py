@@ -217,18 +217,4 @@ if expenses:
             st.rerun()
 
 else:
-    st.info("No hay gastos que coincidan con los filtros aplicados.")
-
-# Quick actions
-st.markdown("---")
-st.subheader("Acciones Rápidas")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("Ver Vista General", use_container_width=True):
-        st.switch_page("vista/overview.py")
-
-with col2:
-    if st.button("Ver Estadísticas", use_container_width=True):
-        st.info("Funcionalidad de estadísticas en desarrollo...") 
+    st.info("No hay gastos que coincidan con los filtros aplicados.") 

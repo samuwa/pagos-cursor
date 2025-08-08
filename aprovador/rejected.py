@@ -166,22 +166,4 @@ if filtered_expenses:
             st.rerun()
 
 else:
-    st.info("📝 No hay gastos rechazados para mostrar.")
-
-# Quick actions
-st.markdown("---")
-st.subheader("⚡ Acciones Rápidas")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    if st.button("⏳ Ver Pendientes", use_container_width=True):
-        st.switch_page("aprovador/pending.py")
-
-with col2:
-    if st.button("✅ Ver Aprobados", use_container_width=True):
-        st.switch_page("aprovador/approved.py")
-
-with col3:
-    if st.button("📊 Ver Estadísticas", use_container_width=True):
-        st.info("📈 Funcionalidad de estadísticas en desarrollo...") 
+    st.success("🎉 ¡No hay gastos rechazados!") 
