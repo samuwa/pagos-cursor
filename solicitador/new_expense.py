@@ -155,33 +155,4 @@ with st.form("new_expense_form"):
             else:
                 st.error("Error al crear el gasto. Por favor intenta de nuevo.")
         else:
-            st.error("Por favor completa la descripción y el monto del gasto.")
-
-# Help section
-with st.expander("❓ ¿Cómo funciona?"):
-    st.markdown("""
-    ### Proceso de Solicitud de Gastos
-    
-    1. **Completa el formulario** con todos los detalles del gasto
-    2. **Adjunta el recibo** si está disponible
-    3. **Envía la solicitud** para que sea revisada por un aprobador
-    4. **Recibe notificaciones** sobre el estado de tu solicitud
-    
-    ### ⏱️ Tiempos de Respuesta
-    
-    - **Gastos urgentes:** 24-48 horas
-    - **Gastos normales:** 3-5 días hábiles
-    - **Gastos grandes:** 1-2 semanas
-    
-    ### 📞 Contacto
-    
-    Si tienes preguntas sobre tu solicitud, contacta al equipo de finanzas.
-    """)
-
-# Recent expenses preview
-st.markdown("---")
-st.subheader("🕒 Tus Gastos Recientes")
-
-# This would show the user's recent expenses
-# For now, just a placeholder
-st.info("Aquí verás tus gastos más recientes una vez que los crees.") 
+            st.error("Por favor completa la descripción y el monto del gasto.") 
