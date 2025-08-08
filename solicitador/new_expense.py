@@ -52,43 +52,48 @@ if not categories:
 category_options = {cat['description']: cat['id'] for cat in categories}
 category_names = list(category_options.keys())
 
-# Multiple category selection
-selected_categories = st.multiselect(
-    "📂 Categorías",
-    options=category_names,
-    help="Selecciona una o más categorías para este gasto"
-)
+# Use columns for category and account selection
+col1, col2 = st.columns(2)
 
-# Account selection based on selected categories
-selected_accounts = []
-if selected_categories:
-    # Get all accounts for the selected categories
-    all_accounts = []
-    for category_name in selected_categories:
-        category_id = category_options[category_name]
-        accounts = get_accounts_by_category(category_id)
-        all_accounts.extend(accounts)
-    
-    if all_accounts:
-        # Remove duplicates and create options
-        unique_accounts = {}
-        for acc in all_accounts:
-            unique_accounts[acc['description']] = acc['id']
+with col1:
+    # Multiple category selection
+    selected_categories = st.multiselect(
+        "📂 Categorías",
+        options=category_names,
+        help="Selecciona una o más categorías para este gasto"
+    )
+
+with col2:
+    # Account selection based on selected categories
+    selected_accounts = []
+    if selected_categories:
+        # Get all accounts for the selected categories
+        all_accounts = []
+        for category_name in selected_categories:
+            category_id = category_options[category_name]
+            accounts = get_accounts_by_category(category_id)
+            all_accounts.extend(accounts)
         
-        account_names = list(unique_accounts.keys())
-        
-        selected_account_names = st.multiselect(
-            "💳 Cuentas",
-            options=account_names,
-            help="Selecciona una o más cuentas para este gasto"
-        )
-        
-        # Convert selected account names to IDs
-        selected_accounts = [unique_accounts[name] for name in selected_account_names]
+        if all_accounts:
+            # Remove duplicates and create options
+            unique_accounts = {}
+            for acc in all_accounts:
+                unique_accounts[acc['description']] = acc['id']
+            
+            account_names = list(unique_accounts.keys())
+            
+            selected_account_names = st.multiselect(
+                "💳 Cuentas",
+                options=account_names,
+                help="Selecciona una o más cuentas para este gasto"
+            )
+            
+            # Convert selected account names to IDs
+            selected_accounts = [unique_accounts[name] for name in selected_account_names]
+        else:
+            st.warning("No hay cuentas disponibles para las categorías seleccionadas.")
     else:
-        st.warning("No hay cuentas disponibles para las categorías seleccionadas.")
-else:
-    st.info("Selecciona al menos una categoría para ver las cuentas disponibles.")
+        st.info("Selecciona al menos una categoría para ver las cuentas disponibles.")
 
 # Additional details
 st.subheader("Información Adicional")
