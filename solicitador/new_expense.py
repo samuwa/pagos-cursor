@@ -52,11 +52,6 @@ with st.form("new_expense_form"):
             "📅 Fecha del gasto",
             value=datetime.now().date()
         )
-        
-        priority = st.selectbox(
-            "⚡ Prioridad",
-            ["Baja", "Media", "Alta", "Urgente"]
-        )
     
     # Additional details
     st.subheader("Información Adicional")
@@ -112,7 +107,6 @@ with st.form("new_expense_form"):
                 "amount": amount,
                 "category": category,
                 "expense_date": expense_date.strftime("%Y-%m-%d"),
-                "priority": priority,
                 "vendor": vendor,
                 "receipt_number": receipt_number,
                 "payment_method": payment_method,
@@ -144,7 +138,6 @@ with st.form("new_expense_form"):
                 with col2:
                     st.write(f"**Estado:** {new_expense['status']}")
                     st.write(f"**Fecha:** {new_expense['expense_date']}")
-                    st.write(f"**Prioridad:** {new_expense['priority']}")
                     st.write(f"**Proveedor:** {new_expense.get('vendor', 'N/A')}")
                 
                 # Next steps
