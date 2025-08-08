@@ -82,6 +82,30 @@ with st.form("new_expense_form"):
             ["Reembolso directo", "Compra corporativa", "Otro"]
         )
     
+    # Reimbursement section
+    st.subheader("Información de Reembolso")
+    
+    is_reimbursement = st.checkbox(
+        "💰 Es un reembolso",
+        help="Marca esta casilla si este gasto es un reembolso que necesitas recuperar"
+    )
+    
+    if is_reimbursement:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            reimbursement_recipient = st.text_input(
+                "👤 Recibidor del reembolso",
+                placeholder="Nombre de la persona que recibirá el reembolso",
+                help="Persona a quien se le hará el reembolso"
+            )
+        
+        with col2:
+            reimbursement_method = st.selectbox(
+                "Método de reembolso",
+                ["Transferencia bancaria", "Efectivo", "Cheque", "Otro"]
+            )
+    
     # Comments
     comments = st.text_area(
         "💬 Comentarios adicionales",
@@ -113,8 +137,16 @@ with st.form("new_expense_form"):
                 "payment_method": payment_method,
                 "reimbursement_type": reimbursement_type,
                 "notes": comments,
-                "status": "pending"
+                "status": "pending",
+                "is_reimbursement": is_reimbursement
             }
+            
+            # Add reimbursement fields if it's a reimbursement
+            if is_reimbursement:
+                expense_data.update({
+                    "reimbursement_recipient": reimbursement_recipient,
+                    "reimbursement_method": reimbursement_method
+                })
             
             # Create the expense
             new_expense = create_expense(expense_data)
