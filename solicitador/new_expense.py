@@ -64,9 +64,11 @@ with st.form("new_expense_form"):
             placeholder="Nombre del proveedor"
         )
         
-        receipt_number = st.text_input(
-            "🧾 Número de recibo",
-            placeholder="Número de factura o recibo"
+        # File upload for quotation
+        quotation_file = st.file_uploader(
+            "📄 Cotización",
+            type=['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+            help="Sube el archivo de la cotización (PDF, Word, o imagen)"
         )
     
     with col2:
@@ -76,8 +78,8 @@ with st.form("new_expense_form"):
         )
         
         reimbursement_type = st.selectbox(
-            "🔄 Tipo de reembolso",
-            ["Reembolso completo", "Reembolso parcial", "Sin reembolso"]
+            "Tipo de reembolso",
+            ["Reembolso directo", "Compra corporativa", "Otro"]
         )
     
     # Comments
@@ -101,20 +103,17 @@ with st.form("new_expense_form"):
         if description and amount > 0:
             # Create expense data
             expense_data = {
-                "id": str(uuid.uuid4()),
-                "user_id": user['id'],
+                "user_id": user["id"],
                 "description": description,
                 "amount": amount,
                 "category": category,
                 "expense_date": expense_date.strftime("%Y-%m-%d"),
                 "vendor": vendor,
-                "receipt_number": receipt_number,
+                "quotation_file": quotation_file.name if quotation_file else None,
                 "payment_method": payment_method,
                 "reimbursement_type": reimbursement_type,
-                "comments": comments,
-                "status": "pending",
-                "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat()
+                "notes": comments,
+                "status": "pending"
             }
             
             # Create the expense
