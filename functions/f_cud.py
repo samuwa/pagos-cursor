@@ -531,4 +531,29 @@ def delete_receiver(receiver_id: int) -> bool:
         return len(response.data) > 0
     except Exception as e:
         st.error(f"Error deleting receiver: {str(e)}")
-        return False 
+        return False
+
+def create_reimbursement(expense_id: int, receiver_id: int, created_by: str) -> Optional[Dict[str, Any]]:
+    """Create a reimbursement record"""
+    try:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot create reimbursement.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        reimbursement_data = {
+            "expense_id": expense_id,
+            "receiver_id": receiver_id,
+            "created_by": created_by
+        }
+        
+        response = supabase_admin.table('reembolsos').insert(reimbursement_data).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        st.error(f"Error creating reimbursement: {str(e)}")
+        return None 

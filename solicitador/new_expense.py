@@ -1,6 +1,6 @@
 import streamlit as st
-from functions.f_read import get_categories, get_accounts_by_category, get_receivers_by_categories
-from functions.f_cud import create_expense, upload_file_to_supabase
+from functions.f_read import get_categories, get_accounts_by_category, get_receivers_by_categories, get_receivers
+from functions.f_cud import create_expense, upload_file_to_supabase, create_reimbursement
 from datetime import datetime
 import uuid
 
@@ -147,14 +147,28 @@ is_reimbursement = st.checkbox(
 )
 
 if is_reimbursement:
-    col1, col2 = st.columns(2)
+    # Get all receivers for reimbursement selection
+    all_receivers = get_receivers()
     
-    with col1:
-        reimbursement_recipient = st.text_input(
-            "👤 Recibidor del reembolso",
-            placeholder="Nombre de la persona que recibirá el reembolso",
-            help="Persona a quien se le hará el reembolso"
+    if all_receivers:
+        # Create receiver options for reimbursement
+        receiver_options = {f"{receiver['name']} ({receiver['email'] or 'Sin email'})": receiver['id'] for receiver in all_receivers}
+        receiver_names = list(receiver_options.keys())
+        
+        # Add a "Select receiver" option
+        receiver_names = ["-- Seleccionar recibidor --"] + receiver_names
+        receiver_options = {"-- Seleccionar recibidor --": None} | receiver_options
+        
+        reimbursement_receiver_name = st.selectbox(
+            "👤 Recibidor del reembolso *",
+            options=receiver_names,
+            help="Selecciona el recibidor que recibirá el reembolso"
         )
+        
+        reimbursement_receiver_id = receiver_options.get(reimbursement_receiver_name)
+    else:
+        st.error("❌ No hay recibidores disponibles. Contacta al administrador para agregar recibidores.")
+        reimbursement_receiver_id = None
 
 # Comments
 comments = st.text_area(
@@ -170,6 +184,8 @@ if st.button("💾 Crear Gasto", type="primary"):
         st.error("Por favor completa todos los campos obligatorios: descripción, monto, categorías y cuentas.")
     elif selected_categories and not selected_provider:
         st.error("❌ Por favor selecciona un proveedor de la lista. Es obligatorio seleccionar un proveedor.")
+    elif is_reimbursement and not reimbursement_receiver_id:
+        st.error("❌ Por favor selecciona un recibidor para el reembolso.")
     else:
         # Upload quotation file if provided
         quotation_info = None
@@ -196,7 +212,7 @@ if st.button("💾 Crear Gasto", type="primary"):
             "receiver_id": selected_provider,  # Add receiver_id to link to the receivers table
             "notes": comments,
             "status": "pending",
-            "is_reimbursement": is_reimbursement
+            "is_reembolso": is_reimbursement
         }
         
         # Add quotation info if uploaded
@@ -207,15 +223,22 @@ if st.button("💾 Crear Gasto", type="primary"):
                 "quotation_file_size": quotation_info["file_size"]
             })
         
-        # Add reimbursement fields if it's a reimbursement
-        if is_reimbursement:
-            expense_data.update({
-                "reimbursement_recipient": reimbursement_recipient
-            })
-        
         # Create the expense
-        if create_expense(expense_data):
-            st.success("✅ Gasto creado exitosamente!")
+        new_expense = create_expense(expense_data)
+        if new_expense:
+            # If it's a reimbursement, create the reimbursement record
+            if is_reimbursement and reimbursement_receiver_id:
+                reimbursement_created = create_reimbursement(
+                    expense_id=new_expense['id'],
+                    receiver_id=reimbursement_receiver_id,
+                    created_by=user["id"]
+                )
+                if reimbursement_created:
+                    st.success("✅ Gasto y reembolso creados exitosamente!")
+                else:
+                    st.warning("⚠️ Gasto creado pero hubo un error al crear el registro de reembolso.")
+            else:
+                st.success("✅ Gasto creado exitosamente!")
             st.balloons()
         else:
             st.error("❌ Error al crear el gasto. Por favor intenta de nuevo.") 
