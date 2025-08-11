@@ -14,7 +14,7 @@ if not user:
 st.subheader("Nuevo Gasto")
 
 # Basic information
-st.subheader("Información Básica")
+st.write("**Información Básica**")
 
 col1, col2 = st.columns(2)
 
@@ -37,7 +37,7 @@ with col2:
     st.write("")  # Empty space for layout consistency
 
 # Category and Account selection
-st.subheader("Categorización")
+st.write("**Categorización**")
 
 # Get all categories
 categories = get_categories()
@@ -94,7 +94,7 @@ with col2:
         st.info("Selecciona al menos una categoría para ver las cuentas disponibles.")
 
 # Additional details
-st.subheader("Información Adicional")
+st.write("**Información Adicional**")
 
 col1, col2 = st.columns(2)
 
@@ -116,25 +116,16 @@ with col1:
             provider_options = {"-- Seleccionar proveedor --": None} | provider_options
             
             selected_provider_name = st.selectbox(
-                "🏢 Proveedor/Vendedor",
+                "🏢 Proveedor/Vendedor *",
                 options=provider_names,
                 help="Selecciona un proveedor de la lista (filtrado por las categorías seleccionadas)"
             )
             
             selected_provider = provider_options.get(selected_provider_name)
         else:
-            st.warning("No hay proveedores disponibles para las categorías seleccionadas.")
-            # Fallback to text input
-            vendor = st.text_input(
-                "🏢 Proveedor/Vendedor (manual)",
-                placeholder="Nombre del proveedor"
-            )
+            st.error("❌ No hay proveedores disponibles para las categorías seleccionadas. Contacta al administrador para agregar proveedores.")
     else:
         st.info("Selecciona al menos una categoría para ver los proveedores disponibles.")
-        vendor = st.text_input(
-            "🏢 Proveedor/Vendedor",
-            placeholder="Nombre del proveedor"
-        )
     
     # File upload for quotation
     quotation_file = st.file_uploader(
@@ -148,7 +139,7 @@ with col2:
     st.write("")  # Empty space for layout consistency
 
 # Reimbursement section
-st.subheader("Información de Reembolso")
+st.write("**Información de Reembolso**")
 
 is_reimbursement = st.checkbox(
     "💰 Es un reembolso",
@@ -164,12 +155,6 @@ if is_reimbursement:
             placeholder="Nombre de la persona que recibirá el reembolso",
             help="Persona a quien se le hará el reembolso"
         )
-    
-    with col2:
-        reimbursement_method = st.selectbox(
-            "Método de reembolso",
-            ["Transferencia bancaria", "Efectivo", "Cheque", "Otro"]
-        )
 
 # Comments
 comments = st.text_area(
@@ -184,7 +169,7 @@ if st.button("💾 Crear Gasto", type="primary"):
     if not description or not amount or not selected_categories or not selected_accounts:
         st.error("Por favor completa todos los campos obligatorios: descripción, monto, categorías y cuentas.")
     elif selected_categories and not selected_provider:
-        st.error("Por favor selecciona un proveedor de la lista.")
+        st.error("❌ Por favor selecciona un proveedor de la lista. Es obligatorio seleccionar un proveedor.")
     else:
         # Upload quotation file if provided
         quotation_info = None
@@ -194,14 +179,11 @@ if st.button("💾 Crear Gasto", type="primary"):
                 st.error("Error al subir el archivo de cotización.")
                 st.stop()
         
-        # Get vendor name (either from selected provider or manual input)
-        vendor_name = vendor if 'vendor' in locals() else None
-        if selected_provider:
-            # Get the selected receiver's name
-            category_ids = [category_options[cat] for cat in selected_categories]
-            available_receivers = get_receivers_by_categories(category_ids)
-            selected_receiver = next((r for r in available_receivers if r['id'] == selected_provider), None)
-            vendor_name = selected_receiver['name'] if selected_receiver else vendor_name
+        # Get vendor name from selected provider
+        category_ids = [category_options[cat] for cat in selected_categories]
+        available_receivers = get_receivers_by_categories(category_ids)
+        selected_receiver = next((r for r in available_receivers if r['id'] == selected_provider), None)
+        vendor_name = selected_receiver['name'] if selected_receiver else "Proveedor no encontrado"
         
         # Create expense data
         expense_data = {
