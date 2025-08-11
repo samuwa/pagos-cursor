@@ -211,8 +211,7 @@ if st.button("💾 Crear Gasto", type="primary"):
             "vendor": vendor_name,
             "receiver_id": selected_provider,  # Add receiver_id to link to the receivers table
             "notes": comments,
-            "status": "pending",
-            "is_reembolso": is_reimbursement
+            "status": "pending"
         }
         
         # Add quotation info if uploaded
