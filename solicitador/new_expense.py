@@ -1,5 +1,5 @@
 import streamlit as st
-from functions.f_read import get_categories, get_accounts_by_category
+from functions.f_read import get_categories, get_accounts_by_category, get_receivers_by_categories
 from functions.f_cud import create_expense, upload_file_to_supabase
 from datetime import datetime
 import uuid
@@ -33,10 +33,8 @@ with col1:
     )
 
 with col2:
-    expense_date = st.date_input(
-        "📅 Fecha del gasto",
-        value=datetime.now().date()
-    )
+    # Removed expense_date field - expense will be created with current timestamp
+    st.write("")  # Empty space for layout consistency
 
 # Category and Account selection
 st.subheader("Categorización")
@@ -101,10 +99,42 @@ st.subheader("Información Adicional")
 col1, col2 = st.columns(2)
 
 with col1:
-    vendor = st.text_input(
-        "🏢 Proveedor/Vendedor",
-        placeholder="Nombre del proveedor"
-    )
+    # Provider selection based on selected categories
+    selected_provider = None
+    if selected_categories:
+        # Get receivers for the selected categories
+        category_ids = [category_options[cat] for cat in selected_categories]
+        available_receivers = get_receivers_by_categories(category_ids)
+        
+        if available_receivers:
+            # Create provider options
+            provider_options = {f"{receiver['name']} ({receiver['email'] or 'Sin email'})": receiver['id'] for receiver in available_receivers}
+            provider_names = list(provider_options.keys())
+            
+            # Add a "Select provider" option
+            provider_names = ["-- Seleccionar proveedor --"] + provider_names
+            provider_options = {"-- Seleccionar proveedor --": None} | provider_options
+            
+            selected_provider_name = st.selectbox(
+                "🏢 Proveedor/Vendedor",
+                options=provider_names,
+                help="Selecciona un proveedor de la lista (filtrado por las categorías seleccionadas)"
+            )
+            
+            selected_provider = provider_options.get(selected_provider_name)
+        else:
+            st.warning("No hay proveedores disponibles para las categorías seleccionadas.")
+            # Fallback to text input
+            vendor = st.text_input(
+                "🏢 Proveedor/Vendedor (manual)",
+                placeholder="Nombre del proveedor"
+            )
+    else:
+        st.info("Selecciona al menos una categoría para ver los proveedores disponibles.")
+        vendor = st.text_input(
+            "🏢 Proveedor/Vendedor",
+            placeholder="Nombre del proveedor"
+        )
     
     # File upload for quotation
     quotation_file = st.file_uploader(
@@ -114,15 +144,8 @@ with col1:
     )
 
 with col2:
-    payment_method = st.selectbox(
-        "Método de pago",
-        ["Efectivo", "Tarjeta de crédito", "Tarjeta de débito", "Transferencia", "Otro"]
-    )
-    
-    reimbursement_type = st.selectbox(
-        "Tipo de reembolso",
-        ["Reembolso directo", "Compra corporativa", "Otro"]
-    )
+    # Removed payment_method and reimbursement_type fields as they are not needed for requesters
+    st.write("")  # Empty space for layout consistency
 
 # Reimbursement section
 st.subheader("Información de Reembolso")
@@ -160,6 +183,8 @@ if st.button("💾 Crear Gasto", type="primary"):
     # Validation
     if not description or not amount or not selected_categories or not selected_accounts:
         st.error("Por favor completa todos los campos obligatorios: descripción, monto, categorías y cuentas.")
+    elif selected_categories and not selected_provider:
+        st.error("Por favor selecciona un proveedor de la lista.")
     else:
         # Upload quotation file if provided
         quotation_info = None
@@ -169,6 +194,15 @@ if st.button("💾 Crear Gasto", type="primary"):
                 st.error("Error al subir el archivo de cotización.")
                 st.stop()
         
+        # Get vendor name (either from selected provider or manual input)
+        vendor_name = vendor if 'vendor' in locals() else None
+        if selected_provider:
+            # Get the selected receiver's name
+            category_ids = [category_options[cat] for cat in selected_categories]
+            available_receivers = get_receivers_by_categories(category_ids)
+            selected_receiver = next((r for r in available_receivers if r['id'] == selected_provider), None)
+            vendor_name = selected_receiver['name'] if selected_receiver else vendor_name
+        
         # Create expense data
         expense_data = {
             "user_id": user["id"],
@@ -176,10 +210,8 @@ if st.button("💾 Crear Gasto", type="primary"):
             "amount": amount,
             "category_ids": [category_options[cat] for cat in selected_categories],
             "account_ids": selected_accounts,
-            "expense_date": expense_date.strftime("%Y-%m-%d"),
-            "vendor": vendor,
-            "payment_method": payment_method,
-            "reimbursement_type": reimbursement_type,
+            "vendor": vendor_name,
+            "receiver_id": selected_provider,  # Add receiver_id to link to the receivers table
             "notes": comments,
             "status": "pending",
             "is_reimbursement": is_reimbursement

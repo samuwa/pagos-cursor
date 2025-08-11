@@ -365,4 +365,98 @@ def get_accounts_by_category(category_id: int) -> List[Dict[str, Any]]:
         return response.data
     except Exception as e:
         st.error(f"Error getting accounts by category: {str(e)}")
+        return []
+
+def get_receiver_by_id(receiver_id: int) -> Optional[Dict[str, Any]]:
+    """Get receiver by ID"""
+    try:
+        supabase = get_supabase_client()
+        if not supabase:
+            return None
+            
+        response = supabase.table('receivers').select('*').eq('id', receiver_id).is_('deleted_at', 'null').single().execute()
+        return response.data if response.data else None
+    except Exception as e:
+        st.error(f"Error getting receiver: {str(e)}")
+        return None
+
+def get_receiver_categories(receiver_id: int) -> List[Dict[str, Any]]:
+    """Get categories associated with a receiver"""
+    try:
+        supabase = get_supabase_client()
+        if not supabase:
+            return []
+            
+        response = supabase.table('receiver_categories').select('category_id').eq('receiver_id', receiver_id).execute()
+        category_ids = [item['category_id'] for item in response.data]
+        
+        if category_ids:
+            categories_response = supabase.table('categories').select('*').in_('id', category_ids).execute()
+            return categories_response.data
+        return []
+    except Exception as e:
+        st.error(f"Error getting receiver categories: {str(e)}")
+        return []
+
+def get_receiver_accounts(receiver_id: int) -> List[Dict[str, Any]]:
+    """Get accounts associated with a receiver"""
+    try:
+        supabase = get_supabase_client()
+        if not supabase:
+            return []
+            
+        response = supabase.table('receiver_accounts').select('account_id').eq('receiver_id', receiver_id).execute()
+        account_ids = [item['account_id'] for item in response.data]
+        
+        if account_ids:
+            accounts_response = supabase.table('accounts').select('*').in_('id', account_ids).execute()
+            return accounts_response.data
+        return []
+    except Exception as e:
+        st.error(f"Error getting receiver accounts: {str(e)}")
+        return []
+
+def get_receivers_by_category(category_id: int) -> List[Dict[str, Any]]:
+    """Get receivers associated with a specific category"""
+    try:
+        supabase = get_supabase_client()
+        if not supabase:
+            return []
+            
+        # Get receiver IDs associated with the category
+        response = supabase.table('receiver_categories').select('receiver_id').eq('category_id', category_id).execute()
+        receiver_ids = [item['receiver_id'] for item in response.data]
+        
+        if receiver_ids:
+            # Get receiver details
+            receivers_response = supabase.table('receivers').select('*').in_('id', receiver_ids).is_('deleted_at', 'null').execute()
+            return receivers_response.data
+        return []
+    except Exception as e:
+        st.error(f"Error getting receivers by category: {str(e)}")
+        return []
+
+def get_receivers_by_categories(category_ids: List[int]) -> List[Dict[str, Any]]:
+    """Get receivers associated with multiple categories"""
+    try:
+        supabase = get_supabase_client()
+        if not supabase:
+            return []
+            
+        if not category_ids:
+            return []
+            
+        # Get receiver IDs associated with any of the categories
+        response = supabase.table('receiver_categories').select('receiver_id').in_('category_id', category_ids).execute()
+        receiver_ids = [item['receiver_id'] for item in response.data]
+        
+        if receiver_ids:
+            # Remove duplicates
+            unique_receiver_ids = list(set(receiver_ids))
+            # Get receiver details
+            receivers_response = supabase.table('receivers').select('*').in_('id', unique_receiver_ids).is_('deleted_at', 'null').execute()
+            return receivers_response.data
+        return []
+    except Exception as e:
+        st.error(f"Error getting receivers by categories: {str(e)}")
         return [] 

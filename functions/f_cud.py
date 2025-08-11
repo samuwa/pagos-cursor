@@ -433,4 +433,102 @@ def upload_payment_receipt(expense_id: int, file, payer_id: str) -> Optional[Dic
         return response.data[0] if response.data else None
     except Exception as e:
         st.error(f"Error uploading payment receipt: {str(e)}")
-        return None 
+        return None
+
+def create_receiver(receiver_data: Dict[str, Any], category_ids: List[int] = None, account_ids: List[int] = None) -> Optional[Dict[str, Any]]:
+    """Create a new receiver with optional category and account associations"""
+    try:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot create receiver.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        # Create the receiver first
+        response = supabase_admin.table('receivers').insert(receiver_data).execute()
+        if not response.data:
+            st.error("Failed to create receiver")
+            return None
+            
+        receiver = response.data[0]
+        receiver_id = receiver['id']
+        
+        # Add category relationships
+        if category_ids:
+            category_relations = [{'receiver_id': receiver_id, 'category_id': cat_id} for cat_id in category_ids]
+            supabase_admin.table('receiver_categories').insert(category_relations).execute()
+        
+        # Add account relationships
+        if account_ids:
+            account_relations = [{'receiver_id': receiver_id, 'account_id': acc_id} for acc_id in account_ids]
+            supabase_admin.table('receiver_accounts').insert(account_relations).execute()
+        
+        return receiver
+    except Exception as e:
+        st.error(f"Error creating receiver: {str(e)}")
+        return None
+
+def update_receiver(receiver_id: int, update_data: Dict[str, Any], category_ids: List[int] = None, account_ids: List[int] = None) -> Optional[Dict[str, Any]]:
+    """Update an existing receiver with optional category and account associations"""
+    try:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot update receiver.")
+            return None
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        # Update the receiver
+        response = supabase_admin.table('receivers').update(update_data).eq('id', receiver_id).execute()
+        if not response.data:
+            st.error("Failed to update receiver")
+            return None
+        
+        # Update category relationships if provided
+        if category_ids is not None:
+            # Remove existing category relationships
+            supabase_admin.table('receiver_categories').delete().eq('receiver_id', receiver_id).execute()
+            # Add new category relationships
+            if category_ids:
+                category_relations = [{'receiver_id': receiver_id, 'category_id': cat_id} for cat_id in category_ids]
+                supabase_admin.table('receiver_categories').insert(category_relations).execute()
+        
+        # Update account relationships if provided
+        if account_ids is not None:
+            # Remove existing account relationships
+            supabase_admin.table('receiver_accounts').delete().eq('receiver_id', receiver_id).execute()
+            # Add new account relationships
+            if account_ids:
+                account_relations = [{'receiver_id': receiver_id, 'account_id': acc_id} for acc_id in account_ids]
+                supabase_admin.table('receiver_accounts').insert(account_relations).execute()
+        
+        return response.data[0]
+    except Exception as e:
+        st.error(f"Error updating receiver: {str(e)}")
+        return None
+
+def delete_receiver(receiver_id: int) -> bool:
+    """Delete a receiver (soft delete)"""
+    try:
+        # Use service role key to bypass RLS for admin operations
+        url = os.environ.get("SUPABASE_URL")
+        service_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not service_key:
+            st.error("Missing Supabase service role key. Cannot delete receiver.")
+            return False
+            
+        # Create client with service role key to bypass RLS
+        supabase_admin = create_client(url, service_key)
+        
+        response = supabase_admin.table('receivers').update({'deleted_at': 'now()'}).eq('id', receiver_id).execute()
+        return len(response.data) > 0
+    except Exception as e:
+        st.error(f"Error deleting receiver: {str(e)}")
+        return False 
