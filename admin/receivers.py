@@ -92,7 +92,9 @@ with tab2:
             with st.form("edit_receiver_form"):
                 st.write(f"**Editando:** {selected_receiver['name']}")
                 
-                new_name = st.text_input("Nombre", value=selected_receiver['name'])
+                # Display name as read-only (cannot be edited)
+                st.info(f"**Nombre:** {selected_receiver['name']} (no se puede editar)")
+                
                 new_email = st.text_input("Email", value=selected_receiver['email'] or "")
                 new_phone = st.text_input("Teléfono", value=selected_receiver['phone'] or "")
                 new_role = st.text_input("Rol/Cargo", value=selected_receiver['role'] or "")
@@ -119,24 +121,16 @@ with tab2:
                 )
                 new_account_ids = [account_options[acc] for acc in new_accounts]
                 
-                col1, col2, col3 = st.columns(3)
+                col1, col2 = st.columns(2)
                 with col1:
                     submitted = st.form_submit_button("Guardar Cambios")
                 with col2:
                     if st.form_submit_button("Cancelar"):
                         st.rerun()
-                with col3:
-                    if st.form_submit_button("Eliminar Recibidor"):
-                        if delete_receiver(selected_receiver['id']):
-                            st.success("Recibidor eliminado exitosamente!")
-                            st.rerun()
-                        else:
-                            st.error("Error al eliminar el recibidor")
                 
                 if submitted:
-                    # Update receiver
+                    # Update receiver (name cannot be changed)
                     update_data = {
-                        "name": new_name,
                         "email": new_email if new_email else None,
                         "phone": new_phone if new_phone else None,
                         "role": new_role if new_role else None

@@ -210,8 +210,7 @@ if st.button("💾 Crear Gasto", type="primary"):
         # Add reimbursement fields if it's a reimbursement
         if is_reimbursement:
             expense_data.update({
-                "reimbursement_recipient": reimbursement_recipient,
-                "reimbursement_method": reimbursement_method
+                "reimbursement_recipient": reimbursement_recipient
             })
         
         # Create the expense
